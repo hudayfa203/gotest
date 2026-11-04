@@ -72,7 +72,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
@@ -141,7 +141,7 @@ jobs:
           echo "compileSdk=$compile buildTools=$tools ndk=$ndk"
           sdkm="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
           yes 2>/dev/null | "$sdkm" --install "platforms;android-$compile" "build-tools;$tools" "ndk;$ndk" > "$RUNNER_TEMP/sdkmanager.log" 2>&1 \
-            || echo "::warning::sdkmanager could not pre-install every package; Gradle will try to download what is missing"
+            || echo "::warning title=sdkmanager::Could not pre-install every package (Gradle will try to download what is missing): $(tail -n 6 "$RUNNER_TEMP/sdkmanager.log" | tr '\n' ' ' | cut -c1-600)"
           bt="$ANDROID_HOME/build-tools/$tools"
           [ -d "$bt" ] || bt=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -n 1)
           echo "BUILD_TOOLS=$bt" >> "$GITHUB_ENV"
@@ -350,7 +350,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         if: env.HAS_UPLOAD_KEY == 'true'
         with:
           distribution: temurin

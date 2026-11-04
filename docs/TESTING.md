@@ -14,7 +14,25 @@ Each release's notes contain that build's results and its emulator screenshots.
 
 ## GitHub build results
 
-_Filled in from the first release run — see the latest entry on the [Releases page](https://github.com/hudayfa203/gotest/releases)._
+First release, **v1.0.0** (4 November 2026, [release page](https://github.com/hudayfa203/gotest/releases/tag/v1.0.0)) —
+every job passed:
+
+| Job | Result |
+|---|---|
+| Typecheck + 95 unit tests | ✅ pass |
+| Release APK build (Gradle, Hermes, new architecture) | ✅ `GO-World-News-v1.0.0.apk`, 91 MB, arm64-v8a + armeabi-v7a + x86_64 |
+| APK checks | ✅ package `news.goworld.app`, versionName 1.0.0 / versionCode 2, minSdk 24 (Android 7.0), targetSdk 36, APK Signature Scheme v2 valid |
+| Emulator test, Android 14 (API 34), 1080×2400 | ✅ installed; cold start 3.0 s to first frame (software-rendered emulator); Home, Latest, Live Updates and Settings opened via the app's deep links; process alive after each screen and after Back; **no crash, no JavaScript errors** in logcat |
+| What the screens showed | GO World News logo, tab bar (Home · Latest · Explore · Video · Saved), Settings sections — and on content screens the honest *"server could not be reached"* message, because the API at `https://goworld.news/api/v1` is not online yet ([BACKEND.md](BACKEND.md)) |
+| GitHub Release | ✅ APK, stable-name copy, SHA-256 file and four emulator screenshots attached |
+
+![v1.0.0 on the Android 14 emulator: Home, Latest, Live Updates, Settings](screenshots/emulator-v1.0.0.jpg)
+
+Later builds: each release on the [Releases page](https://github.com/hudayfa203/gotest/releases) carries its own
+results and screenshots.
+
+Fixed after v1.0.0: on screens that load from the server, the message said *"You're offline"* even when the phone was
+online and only the server was unreachable; it now says *"Couldn't reach GO World News"* in that case (v1.0.1).
 
 ## Verified during development (before this repository)
 

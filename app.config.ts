@@ -15,7 +15,8 @@ import type { ExpoConfig, ConfigContext } from 'expo/config';
  *   GW_UPLOAD_*           Android upload-key signing, see plugins/withAndroidReleaseSigning.js
  */
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://goworld.news/api/v1';
-const VERSION_NAME = process.env.GW_VERSION_NAME || '1.0.0';
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const VERSION_NAME: string = process.env.GW_VERSION_NAME || require('./package.json').version;
 const VERSION_CODE = Math.max(1, Number.parseInt(process.env.GW_VERSION_CODE ?? '', 10) || 1);
 const EAS_PROJECT_ID = process.env.EAS_PROJECT_ID;
 

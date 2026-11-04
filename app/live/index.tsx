@@ -60,7 +60,7 @@ export default function LiveHubScreen() {
     const out: Row[] = [];
     const stale = hub.dataUpdatedAt && now - hub.dataUpdatedAt > 5 * 60_000;
     if ((offline || hub.isError) && stale) {
-      out.push({ key: 'note', kind: 'note', text: `You’re offline. Showing live coverage as of ${formatTime(new Date(hub.dataUpdatedAt).toISOString())} — statuses may have changed since.` });
+      out.push({ key: 'note', kind: 'note', text: `${offline ? 'You’re offline.' : 'GO World News couldn’t be reached.'} Showing live coverage as of ${formatTime(new Date(hub.dataUpdatedAt).toISOString())} — statuses may have changed since.` });
     }
     const active = d.active.filter((x) => x.state === 'live');
     out.push({ key: 'h-live', kind: 'header', title: 'Live now', live: active.length > 0, subtitle: active.length ? 'Refreshes automatically' : undefined });
@@ -93,7 +93,7 @@ export default function LiveHubScreen() {
       {hub.isPending ? (
         <LiveHubSkeleton />
       ) : hub.isError && !hub.data ? (
-        <ErrorState error={hub.error} onRetry={() => void hub.refetch()} title={isNetworkError(hub.error) ? 'You’re offline' : 'Couldn’t load live coverage'} />
+        <ErrorState error={hub.error} onRetry={() => void hub.refetch()} title={isNetworkError(hub.error) ? (offline ? 'You’re offline' : 'Couldn’t reach GO World News') : 'Couldn’t load live coverage'} />
       ) : everythingEmpty ? (
         <EmptyState
           icon="broadcast"

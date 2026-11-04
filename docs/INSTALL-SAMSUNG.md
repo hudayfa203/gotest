@@ -25,7 +25,7 @@ or Google Play. If it is on, the install button does nothing or you see *"Blocke
 1. Open the link above **on the phone** in Chrome or Samsung Internet.
 2. If the browser warns *"File might be harmful"*, tap **Download anyway**. (Every APK from outside Google Play gets
    this warning.)
-3. Wait until the download is finished (about 60–80 MB).
+3. Wait until the download is finished (about 90 MB — the test APK contains code for all phone CPU types).
 
 ## 3. Install
 
