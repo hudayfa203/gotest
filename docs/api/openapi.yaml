@@ -1,0 +1,2044 @@
+openapi: 3.1.0
+info:
+  title: GO World News — Public Content & Reader API
+  version: 1.1.0
+  summary: One API for goworld.news, the iPhone app and the Android app.
+  description: 'Implemented by `apps/web/app/api/v1/**` on top of `packages/core`. Content endpoints read only the published-only `public_api`
+    database views; reader endpoints are rate-limited and isolated per reader/device by row-level security. Shapes mirror `packages/contracts`
+    (Zod). The newsroom (create/edit/approve/publish) is not part of this API — it runs in the dashboard at admin.goworld.news. Human-readable
+    guide: docs/API.md.'
+  contact:
+    name: GO World News Engineering
+    url: https://goworld.news
+  license:
+    name: Proprietary
+    identifier: LicenseRef-Proprietary
+servers:
+- url: https://goworld.news/api/v1
+  description: Production (after deployment)
+- url: http://localhost:3000/api/v1
+  description: Local development
+security: []
+tags:
+- name: Content
+  description: Published articles, homepage, live coverage and alerts (cacheable)
+- name: Discovery
+  description: Sections, authors, topics, navigation, search, podcasts, map
+- name: Sync
+  description: Change feed and client configuration for the apps
+- name: Reader
+  description: Devices, notification preferences, reader accounts and saved articles
+- name: Newsletter
+  description: Double opt-in subscription management
+- name: Analytics
+  description: First-party, privacy-preserving reading events
+- name: Advertising
+  description: Direct-sold ad creatives and counters
+- name: Live
+  description: Live coverage (ongoing, ended, archived) — separate from breaking alerts
+paths:
+  /home:
+    get:
+      tags:
+      - Content
+      operationId: getHomepage
+      summary: 'Homepage: breaking alerts and sections arranged in the newsroom dashboard'
+      responses:
+        '200':
+          description: Homepage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Homepage'
+  /articles:
+    get:
+      tags:
+      - Content
+      operationId: listArticles
+      summary: Published articles, newest first (keyset pagination)
+      responses:
+        '200':
+          description: A page of articles
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArticlePage'
+        '400': &id001
+          $ref: '#/components/responses/BadRequest'
+      parameters:
+      - name: category
+        in: query
+        schema:
+          $ref: '#/components/schemas/Slug'
+        description: Section slug; includes child sections
+      - name: tag
+        in: query
+        schema:
+          $ref: '#/components/schemas/Slug'
+      - name: author
+        in: query
+        schema:
+          $ref: '#/components/schemas/Slug'
+      - name: type
+        in: query
+        schema:
+          $ref: '#/components/schemas/ContentType'
+      - name: label
+        in: query
+        schema:
+          $ref: '#/components/schemas/Label'
+      - $ref: '#/components/parameters/Cursor'
+      - $ref: '#/components/parameters/PageSize'
+  /articles/{id}:
+    get:
+      tags:
+      - Content
+      operationId: getArticle
+      summary: One published article (410 + tombstone when withdrawn)
+      responses:
+        '200':
+          description: Article
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Article'
+        '404': &id002
+          $ref: '#/components/responses/NotFound'
+        '410':
+          description: Withdrawn — delete any offline copy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    $ref: '#/components/schemas/ErrorBody'
+                  tombstone:
+                    $ref: '#/components/schemas/Tombstone'
+                required:
+                - tombstone
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/PublicId'
+  /articles/{id}/live:
+    get:
+      tags:
+      - Content
+      operationId: getLiveUpdates
+      summary: Live-blog updates (pinned first, then newest)
+      responses:
+        '200':
+          description: Updates
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LiveUpdate'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/PublicId'
+      - name: since
+        in: query
+        schema:
+          type: string
+          format: date-time
+        description: Only updates after this time
+  /resolve:
+    get:
+      tags:
+      - Content
+      operationId: resolvePath
+      summary: Resolve a website path (deep links, old URLs) to an article, redirect or gone
+      responses:
+        '200':
+          description: Resolution
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Resolution'
+        '400': *id001
+        '404': *id002
+      parameters:
+      - name: path
+        in: query
+        schema:
+          type: string
+          pattern: ^/
+        required: true
+  /alerts:
+    get:
+      tags:
+      - Content
+      operationId: listAlerts
+      summary: Active breaking-news banners
+      responses:
+        '200':
+          description: Alerts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BreakingAlert'
+  /categories:
+    get:
+      tags:
+      - Discovery
+      operationId: listCategories
+      summary: All active sections
+      responses:
+        '200':
+          description: Sections
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+  /navigation:
+    get:
+      tags:
+      - Discovery
+      operationId: getNavigation
+      summary: A navigation menu edited in the dashboard
+      responses:
+        '200':
+          description: Menu items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    label:
+                      type: string
+                    href:
+                      type: string
+                    children:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          label:
+                            type: string
+                          href:
+                            type: string
+      parameters:
+      - name: menu
+        in: query
+        schema:
+          type: string
+          enum:
+          - web_main
+          - web_footer
+          - app_explore
+          - app_tabs
+  /authors/{slug}:
+    get:
+      tags:
+      - Discovery
+      operationId: getAuthor
+      summary: Author profile and their articles
+      responses:
+        '200':
+          description: Author
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  author:
+                    $ref: '#/components/schemas/AuthorProfile'
+                  articles:
+                    $ref: '#/components/schemas/ArticlePage'
+                required:
+                - author
+                - articles
+        '404': *id002
+      parameters:
+      - name: slug
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Slug'
+      - $ref: '#/components/parameters/Cursor'
+  /tags/{slug}:
+    get:
+      tags:
+      - Discovery
+      operationId: getTopic
+      summary: Topic (tag) and its articles
+      responses:
+        '200':
+          description: Topic
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tag:
+                    type: object
+                    properties:
+                      slug:
+                        type: string
+                      name:
+                        type: string
+                  articles:
+                    $ref: '#/components/schemas/ArticlePage'
+                required:
+                - tag
+                - articles
+        '404': *id002
+      parameters:
+      - name: slug
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Slug'
+      - $ref: '#/components/parameters/Cursor'
+  /search:
+    get:
+      tags:
+      - Discovery
+      operationId: search
+      summary: Full-text search over published articles (60 requests/min/IP)
+      responses:
+        '200':
+          description: Results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArticlePage'
+        '400': *id001
+        '429': &id003
+          $ref: '#/components/responses/TooManyRequests'
+      parameters:
+      - name: q
+        in: query
+        schema:
+          type: string
+          minLength: 2
+          maxLength: 200
+        required: true
+      - name: category
+        in: query
+        schema:
+          $ref: '#/components/schemas/Slug'
+      - name: author
+        in: query
+        schema:
+          $ref: '#/components/schemas/Slug'
+      - name: tag
+        in: query
+        schema:
+          $ref: '#/components/schemas/Slug'
+      - name: type
+        in: query
+        schema:
+          $ref: '#/components/schemas/ContentType'
+      - name: from
+        in: query
+        schema:
+          type: string
+          format: date
+      - name: to
+        in: query
+        schema:
+          type: string
+          format: date
+      - name: sort
+        in: query
+        schema:
+          type: string
+          enum:
+          - relevance
+          - newest
+          default: relevance
+      - name: page
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - $ref: '#/components/parameters/PageSize'
+  /pulse:
+    get:
+      tags:
+      - Discovery
+      operationId: worldPulse
+      summary: Located stories for the World Pulse map
+      responses:
+        '200':
+          description: Stories with location
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ArticleSummary'
+  /podcasts:
+    get:
+      tags:
+      - Discovery
+      operationId: listPodcastEpisodes
+      summary: Podcast episodes
+      responses:
+        '200':
+          description: Episodes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PodcastEpisode'
+      parameters:
+      - name: series
+        in: query
+        schema:
+          $ref: '#/components/schemas/Slug'
+  /corrections:
+    get:
+      tags:
+      - Discovery
+      operationId: listCorrections
+      summary: Public corrections log
+      responses:
+        '200':
+          description: Corrections
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    articleId:
+                      $ref: '#/components/schemas/PublicId'
+                    headline:
+                      type: string
+                    url:
+                      type: string
+                      format: uri
+                    path:
+                      type: string
+                    note:
+                      type: string
+                    at:
+                      type: string
+                      format: date-time
+  /sync:
+    get:
+      tags:
+      - Sync
+      operationId: syncChanges
+      summary: What changed since a cursor — apps refresh or purge offline copies explicitly
+      responses:
+        '200':
+          description: Changes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SyncChanges'
+        '400': *id001
+      parameters:
+      - name: cursor
+        in: query
+        schema:
+          type: string
+        description: Opaque cursor from the previous call; start with 0
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 500
+          default: 200
+  /config:
+    get:
+      tags:
+      - Sync
+      operationId: getClientConfig
+      summary: Public client settings and page texts
+      responses:
+        '200':
+          description: Settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientConfig'
+  /ads:
+    get:
+      tags:
+      - Advertising
+      operationId: getAd
+      summary: Creative for a placement (direct-sold campaigns), or null
+      responses:
+        '200':
+          description: Ad or null
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  placement:
+                    type: string
+                  ad:
+                    oneOf:
+                    - type: 'null'
+                    - $ref: '#/components/schemas/Ad'
+                required:
+                - placement
+                - ad
+      parameters:
+      - name: placement
+        in: query
+        schema:
+          type: string
+        required: true
+  /ads/event:
+    post:
+      tags:
+      - Advertising
+      operationId: recordAdEvent
+      summary: Count a viewable impression or a click
+      responses:
+        '204':
+          description: Recorded
+        '400': *id001
+        '429': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                campaignId:
+                  type: string
+                  format: uuid
+                placement:
+                  type: string
+                kind:
+                  type: string
+                  enum:
+                  - impression
+                  - click
+              required:
+              - campaignId
+              - placement
+              - kind
+  /devices:
+    post:
+      tags:
+      - Reader
+      operationId: registerDevice
+      summary: Register an app install (20/hour/IP) → device credential for X-Device-Token
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deviceId:
+                    type: string
+                    format: uuid
+                  deviceToken:
+                    type: string
+                required:
+                - deviceId
+                - deviceToken
+        '400': *id001
+        '429': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                platform:
+                  type: string
+                  enum:
+                  - ios
+                  - android
+                  - web
+                appVersion:
+                  type: string
+                locale:
+                  type: string
+                timezone:
+                  type: string
+              required:
+              - platform
+  /devices/me/preferences:
+    get:
+      tags:
+      - Reader
+      operationId: getNotificationPreferences
+      summary: This device's notification settings
+      responses:
+        '200':
+          description: Preferences
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DevicePreferences'
+        '401': &id004
+          $ref: '#/components/responses/Unauthorized'
+      security:
+      - deviceToken: []
+    put:
+      tags:
+      - Reader
+      operationId: setNotificationPreferences
+      summary: Save push token and notification preferences
+      responses:
+        '200':
+          description: Preferences
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DevicePreferences'
+        '400': *id001
+        '401': *id004
+      security:
+      - deviceToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                pushToken:
+                  type:
+                  - string
+                  - 'null'
+                notificationsEnabled:
+                  type: boolean
+                breaking:
+                  type: boolean
+                dailyBriefing:
+                  type: boolean
+                categorySlugs:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Slug'
+                  maxItems: 30
+                quietHours:
+                  oneOf:
+                  - type: 'null'
+                  - type: object
+                    properties:
+                      start:
+                        type: string
+                        pattern: ^\d{2}:\d{2}$
+                      end:
+                        type: string
+                        pattern: ^\d{2}:\d{2}$
+                    required:
+                    - start
+                    - end
+  /push/opened:
+    post:
+      tags:
+      - Reader
+      operationId: pushOpened
+      summary: Report that a push notification was opened
+      responses:
+        '204':
+          description: Recorded
+        '401': *id004
+      security:
+      - deviceToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                campaignId:
+                  type: string
+                  format: uuid
+                articleId:
+                  $ref: '#/components/schemas/PublicId'
+                platform:
+                  type: string
+                  enum:
+                  - ios
+                  - android
+              required:
+              - campaignId
+              - platform
+  /auth/request:
+    post:
+      tags:
+      - Reader
+      operationId: requestSignInLink
+      summary: Email a one-time sign-in link (same response whether or not an account exists)
+      responses:
+        '202':
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  emailDelivered:
+                    type: boolean
+                    description: false when no email provider is configured
+        '400': *id001
+        '429': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                app:
+                  type: boolean
+                returnTo:
+                  type: string
+                  pattern: ^/
+              required:
+              - email
+  /auth/verify:
+    post:
+      tags:
+      - Reader
+      operationId: verifySignIn
+      summary: Exchange a sign-in token for a session (cookie on the web, token for apps)
+      responses:
+        '200':
+          description: Signed in
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  sessionToken:
+                    type: string
+        '400': *id001
+        '429': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                app:
+                  type: boolean
+              required:
+              - token
+  /auth/logout:
+    post:
+      tags:
+      - Reader
+      operationId: signOut
+      summary: End the reader session
+      responses:
+        '204':
+          description: Signed out
+      security:
+      - readerSession: []
+      - readerCookie: []
+  /me:
+    get:
+      tags:
+      - Reader
+      operationId: getMe
+      summary: Whether the caller is signed in
+      responses:
+        '200':
+          description: Status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  signedIn:
+                    type: boolean
+    delete:
+      tags:
+      - Reader
+      operationId: deleteAccount
+      summary: Delete the reader account, sessions and saved articles
+      responses:
+        '204':
+          description: Deleted
+        '401': *id004
+      security:
+      - readerSession: []
+      - readerCookie: []
+  /me/bookmarks:
+    get:
+      tags:
+      - Reader
+      operationId: listBookmarks
+      summary: Signed-in reader's saved articles
+      responses:
+        '200':
+          description: Saved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    savedAt:
+                      type: string
+                      format: date-time
+                    article:
+                      $ref: '#/components/schemas/ArticleSummary'
+        '401': *id004
+      security:
+      - readerSession: []
+      - readerCookie: []
+  /me/bookmarks/{id}:
+    put:
+      tags:
+      - Reader
+      operationId: addBookmark
+      summary: Save an article
+      responses:
+        '204':
+          description: Saved
+        '401': *id004
+        '404': *id002
+      security:
+      - readerSession: []
+      - readerCookie: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/PublicId'
+    delete:
+      tags:
+      - Reader
+      operationId: removeBookmark
+      summary: Remove a saved article
+      responses:
+        '204':
+          description: Removed
+        '401': *id004
+      security:
+      - readerSession: []
+      - readerCookie: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/PublicId'
+  /newsletter/subscribe:
+    post:
+      tags:
+      - Newsletter
+      operationId: subscribe
+      summary: Start double opt-in (10/hour/IP)
+      responses:
+        '202':
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  status:
+                    type: string
+                    enum:
+                    - confirmation_sent
+                    - already_subscribed
+                  emailDelivered:
+                    type: boolean
+        '400': *id001
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                lists:
+                  type: array
+                  items:
+                    type: string
+                  default:
+                  - daily
+                consent:
+                  type: boolean
+                  const: true
+                source:
+                  type: string
+              required:
+              - email
+              - consent
+  /newsletter/confirm:
+    post:
+      tags:
+      - Newsletter
+      operationId: confirmSubscription
+      summary: Confirm with the token from the email
+      responses:
+        '200':
+          description: Result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  confirmed:
+                    type: boolean
+        '400': *id001
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+              required:
+              - token
+  /newsletter/unsubscribe:
+    post:
+      tags:
+      - Newsletter
+      operationId: unsubscribe
+      summary: One-click unsubscribe (token from the email footer)
+      responses:
+        '204':
+          description: Unsubscribed
+        '400': *id001
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+              required:
+              - token
+  /events:
+    post:
+      tags:
+      - Analytics
+      operationId: ingestEvents
+      summary: First-party reading events (no IPs stored; DNT/GPC honoured)
+      responses:
+        '202':
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accepted:
+                    type: integer
+        '400': *id001
+        '429': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                events:
+                  type: array
+                  minItems: 1
+                  maxItems: 50
+                  items:
+                    type: object
+                    properties:
+                      event:
+                        type: string
+                        enum:
+                        - page_view
+                        - article_view
+                        - engaged_30s
+                        - read_complete
+                        - share
+                        - push_open
+                        - video_play
+                        - audio_play
+                        - newsletter_signup
+                        - search
+                      platform:
+                        type: string
+                        enum:
+                        - web
+                        - ios
+                        - android
+                      articleId:
+                        $ref: '#/components/schemas/PublicId'
+                      sessionId:
+                        type: string
+                        minLength: 8
+                        maxLength: 100
+                      path:
+                        type: string
+                      referrer:
+                        type: string
+                      props:
+                        type: object
+                        additionalProperties: true
+                    required:
+                    - event
+                    - platform
+                    - sessionId
+              required:
+              - events
+  /health:
+    get:
+      tags:
+      - Sync
+      operationId: health
+      summary: Liveness/readiness (database reachable)
+      servers:
+      - url: https://goworld.news/api
+        description: Production
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  db:
+                    type: string
+                  ms:
+                    type: integer
+        '503':
+          description: Database unreachable
+  /live:
+    get:
+      tags:
+      - Live
+      operationId: getLiveHub
+      summary: 'Live coverage hub: live now, recently ended, first archive page'
+      responses:
+        '200':
+          description: Hub
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  active:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/LiveCoverage'
+                  recent:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/LiveCoverage'
+                  archive:
+                    $ref: '#/components/schemas/LiveCoveragePage'
+  /live/archive:
+    get:
+      tags:
+      - Live
+      operationId: getLiveArchive
+      summary: Completed live coverage (ended and archived), newest end first
+      parameters:
+      - $ref: '#/components/parameters/Cursor'
+      - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Page
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LiveCoveragePage'
+  /live/{id}:
+    get:
+      tags:
+      - Live
+      operationId: getLiveFeed
+      summary: One live coverage with updates; incremental with ?since=
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/PublicId'
+      - name: since
+        in: query
+        schema:
+          type: string
+          format: date-time
+        description: 'serverTime from the previous response: return only updates published or edited since, plus removedIds'
+      responses:
+        '200':
+          description: Feed
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - coverage
+                - updates
+                - removedIds
+                - serverTime
+                properties:
+                  coverage:
+                    $ref: '#/components/schemas/LiveCoverage'
+                  updates:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/LiveUpdate'
+                  removedIds:
+                    type: array
+                    items:
+                      type: string
+                  serverTime:
+                    type: string
+                    format: date-time
+                  relatedArticles:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ArticleSummary'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '410':
+          description: Withdrawn
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    $ref: '#/components/schemas/ErrorBody'
+                  tombstone:
+                    $ref: '#/components/schemas/Tombstone'
+components:
+  securitySchemes:
+    deviceToken:
+      type: apiKey
+      in: header
+      name: X-Device-Token
+      description: Opaque per-install credential issued by POST /devices
+    readerSession:
+      type: http
+      scheme: bearer
+      description: Opaque reader session token (apps), from POST /auth/verify with app=true
+    readerCookie:
+      type: apiKey
+      in: cookie
+      name: gw_reader
+      description: httpOnly reader session cookie (website)
+  parameters:
+    Cursor:
+      name: cursor
+      in: query
+      schema:
+        type: string
+    PageSize:
+      name: pageSize
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 50
+        default: 20
+  responses:
+    BadRequest:
+      description: Invalid parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Missing or invalid credential
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    TooManyRequests:
+      description: Rate limited
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Forbidden:
+      description: Refused (e.g. cross-site request)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    PublicId:
+      type: string
+      pattern: ^[0-9a-hjkmnp-tv-z]{10}$
+      examples:
+      - k3m9x2q7ab
+    Slug:
+      type: string
+      pattern: ^[a-z0-9]+(?:-[a-z0-9]+)*$
+      maxLength: 120
+    ContentType:
+      type: string
+      enum:
+      - news
+      - analysis
+      - opinion
+      - investigation
+      - explainer
+      - live
+      - video
+      - podcast
+      - sponsored
+    Label:
+      type: string
+      enum:
+      - breaking
+      - exclusive
+      - developing
+      - live
+      - fact_check
+      - sponsored
+    Image:
+      type: object
+      required:
+      - id
+      - url
+      - width
+      - height
+      - alt
+      properties:
+        id:
+          type: string
+        url:
+          type: string
+          format: uri
+        width:
+          type: integer
+        height:
+          type: integer
+        alt:
+          type: string
+          minLength: 1
+        caption:
+          type: string
+        credit:
+          type: string
+        variants:
+          type: array
+          items:
+            type: object
+            properties:
+              width:
+                type: integer
+              url:
+                type: string
+                format: uri
+              format:
+                type: string
+                enum:
+                - avif
+                - webp
+                - jpeg
+    Category:
+      type: object
+      required:
+      - slug
+      - name
+      properties:
+        id:
+          type: string
+        slug:
+          $ref: '#/components/schemas/Slug'
+        name:
+          type: string
+        parentSlug:
+          type:
+          - string
+          - 'null'
+    Author:
+      type: object
+      required:
+      - slug
+      - name
+      properties:
+        id:
+          type: string
+        slug:
+          $ref: '#/components/schemas/Slug'
+        name:
+          type: string
+        role:
+          type: string
+        credit:
+          type: string
+          enum:
+          - author
+          - contributor
+          - photographer
+          - editor
+        avatar:
+          $ref: '#/components/schemas/Image'
+    Block:
+      type: object
+      required:
+      - type
+      description: Portable rich-text block (paragraph, heading, quote, list, image, video, embed, table, related, ad_slot, newsletter_prompt).
+        See packages/contracts for the full union.
+      properties:
+        type:
+          type: string
+      additionalProperties: true
+    ArticleSummary:
+      type: object
+      required:
+      - id
+      - url
+      - path
+      - type
+      - headline
+      - category
+      - authors
+      - publishedAt
+      - updatedAt
+      - readingTimeMinutes
+      - isDemo
+      properties:
+        id:
+          $ref: '#/components/schemas/PublicId'
+        url:
+          type: string
+          format: uri
+        path:
+          type: string
+        type:
+          $ref: '#/components/schemas/ContentType'
+        labels:
+          type: array
+          items:
+            $ref: '#/components/schemas/Label'
+        headline:
+          type: string
+          maxLength: 200
+        standfirst:
+          type: string
+          maxLength: 400
+        category:
+          $ref: '#/components/schemas/Category'
+        authors:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/Author'
+        image:
+          $ref: '#/components/schemas/Image'
+        publishedAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        readingTimeMinutes:
+          type: integer
+          minimum: 1
+        location:
+          type: object
+          properties:
+            name:
+              type: string
+            lat:
+              type: number
+            lng:
+              type: number
+        video:
+          type: object
+          properties:
+            provider:
+              type: string
+              enum:
+              - stream
+              - youtube
+              - vimeo
+              - file
+            id:
+              type: string
+            url:
+              type: string
+              format: uri
+            durationSeconds:
+              type: number
+        isDemo:
+          type: boolean
+          description: Demonstration content — clients must show a visible "Demo" label
+        live:
+          type: object
+          description: present on live coverage
+          properties:
+            state:
+              type: string
+              enum:
+              - live
+              - ended
+            startedAt:
+              type:
+              - string
+              - 'null'
+              format: date-time
+            endedAt:
+              type:
+              - string
+              - 'null'
+              format: date-time
+            archived:
+              type: boolean
+    Article:
+      allOf:
+      - $ref: '#/components/schemas/ArticleSummary'
+      - type: object
+        required:
+        - body
+        - revision
+        - canonicalUrl
+        - seo
+        properties:
+          subheadline:
+            type: string
+          body:
+            type: array
+            items:
+              $ref: '#/components/schemas/Block'
+          tags:
+            type: array
+            items:
+              type: object
+              properties:
+                slug:
+                  type: string
+                name:
+                  type: string
+          sources:
+            type: array
+            items:
+              type: object
+              properties:
+                label:
+                  type: string
+                url:
+                  type: string
+                  format: uri
+          corrections:
+            type: array
+            items:
+              type: object
+              required:
+              - at
+              - note
+              properties:
+                at:
+                  type: string
+                  format: date-time
+                note:
+                  type: string
+          revision:
+            type: integer
+            minimum: 1
+          canonicalUrl:
+            type: string
+            format: uri
+          seo:
+            type: object
+            required:
+            - title
+            - description
+            properties:
+              title:
+                type: string
+              description:
+                type: string
+              ogImage:
+                type: string
+                format: uri
+              noindex:
+                type: boolean
+          sponsor:
+            type: object
+            properties:
+              name:
+                type: string
+              disclosure:
+                type: string
+          live:
+            type: object
+            properties:
+              status:
+                type: string
+                enum:
+                - live
+                - ended
+              state:
+                type: string
+                enum:
+                - live
+                - ended
+              updatesUrl:
+                type: string
+                format: uri
+              feedUrl:
+                type: string
+                format: uri
+              startedAt:
+                type:
+                - string
+                - 'null'
+                format: date-time
+              endedAt:
+                type:
+                - string
+                - 'null'
+                format: date-time
+              archived:
+                type: boolean
+          relatedArticles:
+            type: array
+            items:
+              $ref: '#/components/schemas/ArticleSummary'
+    ArticlePage:
+      type: object
+      required:
+      - items
+      - page
+      - pageSize
+      - total
+      - nextCursor
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ArticleSummary'
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        total:
+          type: integer
+        nextCursor:
+          type:
+          - string
+          - 'null'
+    Tombstone:
+      type: object
+      required:
+      - id
+      - state
+      - withdrawnAt
+      - notice
+      properties:
+        id:
+          $ref: '#/components/schemas/PublicId'
+        state:
+          type: string
+          const: withdrawn
+        withdrawnAt:
+          type: string
+          format: date-time
+        notice:
+          type: string
+    LiveUpdate:
+      type: object
+      required:
+      - id
+      - articleId
+      - at
+      - body
+      properties:
+        id:
+          type: string
+        articleId:
+          $ref: '#/components/schemas/PublicId'
+        at:
+          type: string
+          format: date-time
+        pinned:
+          type: boolean
+        headline:
+          type: string
+        body:
+          type: array
+          items:
+            $ref: '#/components/schemas/Block'
+        updatedAt:
+          type: string
+          format: date-time
+          description: set when edited after publishing
+        author:
+          type: object
+          properties:
+            name:
+              type: string
+            slug:
+              type: string
+    BreakingAlert:
+      type: object
+      required:
+      - id
+      - headline
+      - level
+      - startsAt
+      properties:
+        id:
+          type: string
+        headline:
+          type: string
+          maxLength: 120
+        articleId:
+          $ref: '#/components/schemas/PublicId'
+        level:
+          type: string
+          enum:
+          - breaking
+          - developing
+          description: ongoing events are live coverage (/live), not alerts
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        url:
+          type: string
+          format: uri
+        isDemo:
+          type: boolean
+    Homepage:
+      type: object
+      required:
+      - generatedAt
+      - breaking
+      - sections
+      properties:
+        generatedAt:
+          type: string
+          format: date-time
+        breaking:
+          type: array
+          items:
+            $ref: '#/components/schemas/BreakingAlert'
+        sections:
+          type: array
+          items:
+            type: object
+            required:
+            - key
+            - layout
+            - items
+            properties:
+              key:
+                type: string
+              title:
+                type: string
+              layout:
+                type: string
+                enum:
+                - lead
+                - top_stories
+                - latest
+                - editors_picks
+                - region
+                - investigations
+                - opinion
+                - video
+                - podcasts
+                - trending
+                - newsletter
+                - ad
+              items:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ArticleSummary'
+              moreUrl:
+                type: string
+                format: uri
+        liveNow:
+          type: array
+          items:
+            $ref: '#/components/schemas/LiveCoverage'
+          description: ongoing live coverage (separate from breaking alerts)
+    SyncChanges:
+      type: object
+      required:
+      - cursor
+      - updated
+      - withdrawn
+      - hasMore
+      properties:
+        cursor:
+          type: string
+        updated:
+          type: array
+          items:
+            type: object
+            required:
+            - id
+            - revision
+            - updatedAt
+            properties:
+              id:
+                $ref: '#/components/schemas/PublicId'
+              revision:
+                type: integer
+              updatedAt:
+                type: string
+                format: date-time
+        withdrawn:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tombstone'
+        hasMore:
+          type: boolean
+    Error:
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/ErrorBody'
+      required:
+      - error
+    ErrorBody:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        requestId:
+          type: string
+      required:
+      - code
+      - message
+      - requestId
+    Resolution:
+      type: object
+      properties:
+        kind:
+          type: string
+          enum:
+          - article
+          - redirect
+          - gone
+        canonicalPath:
+          type: string
+        status:
+          type: integer
+        articleId:
+          $ref: '#/components/schemas/PublicId'
+      required:
+      - kind
+      - canonicalPath
+      - status
+    AuthorProfile:
+      type: object
+      properties:
+        id:
+          type: string
+        slug:
+          $ref: '#/components/schemas/Slug'
+        name:
+          type: string
+        role:
+          type: string
+        bio:
+          type: string
+        avatarUrl:
+          type: string
+          format: uri
+        links:
+          type: object
+          additionalProperties:
+            type: string
+        isDemo:
+          type: boolean
+      required:
+      - slug
+      - name
+    PodcastEpisode:
+      type: object
+      properties:
+        seriesSlug:
+          type: string
+        seriesTitle:
+          type: string
+        articleId:
+          $ref: '#/components/schemas/PublicId'
+        title:
+          type: string
+        description:
+          type: string
+        publishedAt:
+          type: string
+          format: date-time
+        audioUrl:
+          type: string
+          format: uri
+        audioType:
+          type: string
+        audioBytes:
+          type: integer
+        durationSeconds:
+          type: number
+        episodeNo:
+          type:
+          - integer
+          - 'null'
+        seasonNo:
+          type:
+          - integer
+          - 'null'
+        explicit:
+          type: boolean
+        guid:
+          type: string
+        isDemo:
+          type: boolean
+      required:
+      - articleId
+      - title
+      - audioUrl
+    ClientConfig:
+      type: object
+      properties:
+        siteName:
+          type: string
+        tagline:
+          type: string
+        minSupportedAppVersion:
+          type: string
+        adsEnabled:
+          type: boolean
+        storeUrls:
+          type: object
+          properties:
+            ios:
+              type: string
+              format: uri
+            android:
+              type: string
+              format: uri
+        social:
+          type: object
+          additionalProperties:
+            type: string
+        contactEmail:
+          type: string
+        tipsEmail:
+          type: string
+        pages:
+          type: object
+          properties:
+            about:
+              type: string
+            editorialStandards:
+              type: string
+            privacy:
+              type: string
+            terms:
+              type: string
+    Ad:
+      type: object
+      properties:
+        campaignId:
+          type: string
+          format: uuid
+        advertiser:
+          type: string
+        sponsored:
+          type: boolean
+        clickUrl:
+          type: string
+          format: uri
+        image:
+          oneOf:
+          - type: 'null'
+          - type: object
+            properties:
+              url:
+                type: string
+                format: uri
+              width:
+                type: integer
+              height:
+                type: integer
+              alt:
+                type: string
+        headline:
+          type:
+          - string
+          - 'null'
+        text:
+          type:
+          - string
+          - 'null'
+      required:
+      - campaignId
+      - clickUrl
+    DevicePreferences:
+      type: object
+      properties:
+        notificationsEnabled:
+          type: boolean
+        hasPushToken:
+          type: boolean
+        breaking:
+          type: boolean
+        dailyBriefing:
+          type: boolean
+        categorySlugs:
+          type: array
+          items:
+            type: string
+        quietHours:
+          oneOf:
+          - type: 'null'
+          - type: object
+            properties:
+              start:
+                type: string
+              end:
+                type: string
+    LiveCoverage:
+      type: object
+      required:
+      - id
+      - url
+      - path
+      - headline
+      - category
+      - state
+      - archived
+      - updateCount
+      - isDemo
+      properties:
+        id:
+          $ref: '#/components/schemas/PublicId'
+        url:
+          type: string
+          format: uri
+        path:
+          type: string
+        headline:
+          type: string
+        standfirst:
+          type: string
+        category:
+          type: object
+          properties:
+            slug:
+              type: string
+            name:
+              type: string
+        image:
+          $ref: '#/components/schemas/Image'
+        state:
+          type: string
+          enum:
+          - live
+          - ended
+        archived:
+          type: boolean
+        startedAt:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        endedAt:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        lastUpdateAt:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        updateCount:
+          type: integer
+        latestUpdate:
+          type: object
+          properties:
+            headline:
+              type: string
+            text:
+              type: string
+        location:
+          type: object
+          properties:
+            name:
+              type: string
+            lat:
+              type: number
+            lng:
+              type: number
+        isDemo:
+          type: boolean
+    LiveCoveragePage:
+      type: object
+      required:
+      - items
+      - nextCursor
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/LiveCoverage'
+        nextCursor:
+          type:
+          - string
+          - 'null'

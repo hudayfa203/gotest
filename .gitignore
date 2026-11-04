@@ -1,0 +1,32 @@
+# dependencies and caches
+node_modules/
+.expo/
+expo-env.d.ts
+*.log
+.DS_Store
+
+# build output
+dist/
+dist-web/
+web-build/
+test-results/
+playwright-report/
+*.apk
+*.aab
+
+# Native projects are generated from app.config.ts by `npx expo prebuild` (Continuous Native Generation).
+# CI regenerates them on every build, so they are not committed.
+/android/
+/ios/
+
+# secrets: signing keys and Firebase / Apple credentials never go into git
+*.keystore
+*.jks
+*.p8
+*.p12
+*.mobileprovision
+google-services.json
+GoogleService-Info.plist
+.env
+.env.*
+!.env.example

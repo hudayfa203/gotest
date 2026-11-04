@@ -1,0 +1,56 @@
+# Testing report — GO World News Android app
+
+## On every GitHub build (automatic)
+
+| Step | What it checks |
+|---|---|
+| Typecheck | strict TypeScript over the whole app, including generated typed routes |
+| Unit tests (Jest, 95 tests) | API client (headers, errors, withdrawn content, timeouts, non-API answers), offline sync, deep links, article block helpers, live-coverage merge logic and badges, version gate, server setting |
+| Release build | `expo prebuild` + Gradle `assembleRelease` with Hermes, new architecture, arm64-v8a + armeabi-v7a + x86_64 |
+| APK verification | package `news.goworld.app`, expected versionName/versionCode, APK Signature Scheme v2 valid, certificate fingerprint |
+| Emulator test (Android 14, Pixel 6 profile) | installs the APK, cold-starts it, opens Home, Latest, Live Updates and Settings, takes screenshots, reads the visible text, checks the process is alive and that logcat has no crash; Back button |
+
+Each release's notes contain that build's results and its emulator screenshots.
+
+## GitHub build results
+
+_Filled in from the first release run — see the latest entry on the [Releases page](https://github.com/hudayfa203/gotest/releases)._
+
+## Verified during development (before this repository)
+
+The same app source was tested inside the full GO World News platform:
+
+| Test | Result |
+|---|---|
+| Mobile unit tests (then 88; 95 now with the server setting and non-API-answer checks) | ✅ all pass |
+| Android and iOS JavaScript bundles (`expo export`, Hermes bytecode) | ✅ compile |
+| `expo prebuild` (package, icons, splash, scheme, App Links intent filters, permissions, release-signing plugin) | ✅ generated and checked |
+| Visual checks of every screen at phone and tablet size (web preview, 41 screenshots incl. LIVE UPDATES: home entry light/dark, hub, archive, live/ended/archived coverage, new-update pill, offline saved) | ✅ |
+| Cross-platform integration against the real API (dashboard publishes → website + app API + `/sync` update; live coverage start → updates → end) | ✅ 10/10 |
+
+## Not tested yet — and why
+
+| Not tested | Reason | How it gets tested |
+|---|---|---|
+| On a physical Samsung phone | No phone in the build environment | Install the release APK ([INSTALL-SAMSUNG.md](INSTALL-SAMSUNG.md)) |
+| Real news content inside the APK | The backend is not deployed ([BACKEND.md](BACKEND.md)) | Deploy the backend, then *Settings → Server* or rebuild with `GW_API_URL` |
+| Push notification delivery | Needs Expo project + Firebase ([RELEASING.md](RELEASING.md#push-notifications)); emulators cannot receive push | On the phone after setup |
+| `https://goworld.news/…` links opening the app | Needs the website online with `assetlinks.json` | After deployment |
+| Reader sign-in email | Needs the server's email service | After deployment |
+| Google Play build upload | Needs your Play Console account and upload key | [RELEASING.md](RELEASING.md#google-play-when-you-are-ready) |
+| iPhone build | Needs an Apple Developer account and macOS/Xcode | — |
+
+## Known issues
+
+1. **No content until the backend is online.** Every screen shows the honest "server could not be reached" state with
+   the server address (test builds). This is the main limitation of the current APK.
+2. **Test signing key.** GitHub APKs are signed with the React Native debug keystore (public, same for every build).
+   Fine for side-loading; Play Protect warns about it; never upload such a build to Google Play. Adding the upload key
+   changes the signature once (uninstall/reinstall needed).
+3. **Emulator measurements are not phone measurements.** The CI emulator renders in software, so its start-up time
+   and smoothness are much worse than on a real Galaxy phone.
+4. **Test APK size.** It contains three CPU architectures and no code shrinking (readable crash reports for testers),
+   so it is larger than the Google Play download will be.
+5. **Live coverage refreshes every 20 seconds** (polling), not by push.
+6. **Demo content** from the platform's demonstration data is labelled **DEMO** in the app; it must be removed from
+   the production database before launch.
