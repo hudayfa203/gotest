@@ -31,8 +31,10 @@ every job passed:
 Later builds: each release on the [Releases page](https://github.com/hudayfa203/gotest/releases) carries its own
 results and screenshots.
 
-Fixed after v1.0.0: on screens that load from the server, the message said *"You're offline"* even when the phone was
-online and only the server was unreachable; it now says *"Couldn't reach GO World News"* in that case (v1.0.1).
+**v1.0.1** ([release page](https://github.com/hudayfa203/gotest/releases/tag/v1.0.1)) — every job passed again
+(versionCode 3, 91 MB, cold start 3.4 s on the emulator, no crash, no JavaScript errors). It fixes one wording issue
+found in v1.0.0's emulator screenshots: screens that load from the server said *"You're offline"* even when the phone
+was online and only the server was unreachable; they now say *"Couldn't reach GO World News"* in that case.
 
 ## Verified during development (before this repository)
 
