@@ -2,17 +2,17 @@
 
 ## A new test APK (GitHub Releases)
 
-1. Change the code on `main` (every push builds and emulator-tests an APK; download it from the run's *Artifacts*).
-2. Bump `"version"` in `package.json` if you like (it names the in-between builds, e.g. `1.0.1-build.12`).
-3. Tag and push:
-   ```bash
-   git tag v1.0.1
-   git push origin v1.0.1
-   ```
-4. GitHub Actions → **Android APK** builds it, installs it on an Android 14 emulator and publishes the release
-   **v1.0.1** with `GO-World-News-v1.0.1.apk`, `GO-World-News.apk` (stable name for the "latest" link), the
-   checksum and emulator screenshots. If the emulator test fails, the release is still published but marked
+Every push to `main` builds and emulator-tests an APK (download it from the run's *Artifacts*). To **publish** one:
+
+1. Raise `"version"` in `package.json` (for example `1.0.0` → `1.0.1`) and push to `main`.
+   The first build of a version that has no release yet publishes **release v1.0.1** automatically.
+   (Pushing a git tag `v1.0.1` does the same.)
+2. GitHub Actions → **Android APK** builds it, installs it on an Android 14 emulator and attaches
+   `GO-World-News-v1.0.1.apk`, `GO-World-News.apk` (stable name for the "latest" link), the checksum and emulator
+   screenshots to the release. If the emulator test fails, the release is still published but marked
    **pre-release** with the report at the top, so the "latest" download link keeps pointing at the last good build.
+
+Builds of a version that is already released are named `1.0.1-build.<run>` and stay as workflow artifacts.
 
 Version numbers: the tag gives the visible version (`1.0.1`); the workflow run number gives Android's `versionCode`,
 which only ever goes up, so each new APK installs over the previous one.

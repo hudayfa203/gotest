@@ -19,8 +19,9 @@ The native GO World News app for Android (and iOS), built with **Expo SDK 58 / R
 Hermes). Screens are native views, not a website in a WebView. It reads the same API as the goworld.news website and
 the newsroom dashboard.
 
-Every push to `main` builds a release APK in GitHub Actions and installs it on an Android emulator. Every version tag
-(`v1.0.0`, `v1.0.1`, …) publishes that APK under **[Releases](https://github.com/hudayfa203/gotest/releases)**.
+Every push to `main` builds a release APK in GitHub Actions and installs it on an Android emulator. Each new app
+version (`"version"` in `package.json`, or a `vX.Y.Z` tag) is published with its APK under
+**[Releases](https://github.com/hudayfa203/gotest/releases)** — see [docs/RELEASING.md](docs/RELEASING.md).
 
 ## Install on your phone
 
@@ -107,7 +108,7 @@ Development on a phone or emulator: `npx expo run:android`. More in [docs/DEVELO
 | Setting | Where | Default / purpose |
 |---|---|---|
 | API server | repository variable `GW_API_URL`, or the *Run workflow* field | `https://goworld.news/api/v1` |
-| Version | git tag `vX.Y.Z` → versionName; workflow run number → versionCode | `1.0.0` |
+| Version | `package.json` version (or tag `vX.Y.Z`) → versionName; workflow run number → versionCode | `1.0.0` |
 | Push notifications | variable `EAS_PROJECT_ID`, secret `GOOGLE_SERVICES_JSON_BASE64` | off until configured |
 | Google Play signing | secrets `ANDROID_UPLOAD_KEYSTORE_BASE64`, `…_STORE_PASSWORD`, `…_KEY_ALIAS`, `…_KEY_PASSWORD` | test key until configured |
 

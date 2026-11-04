@@ -1,9 +1,10 @@
 # GO World News — Android build pipeline
 #
-#   push to main / pull request  → typecheck + unit tests → release APK (workflow artifact) → emulator smoke test
-#   push a tag v1.2.3            → the same, then a GitHub Release "v1.2.3" with the APK attached
+#   pull request / push to main  → typecheck + unit tests → release APK (workflow artifact) → emulator smoke test
+#   push to main with a new "version" in package.json (no release vX.Y.Z yet), or push a tag vX.Y.Z
+#                                → the same, then GitHub Release "vX.Y.Z" with the APK attached
 #                                  (and a Google Play bundle as an artifact, if an upload key is configured)
-#   Actions → Android APK → Run workflow  → manual build, optionally against another API server
+#   Actions → Android APK → Run workflow  → manual build (never published), optionally against another API server
 #
 # Optional repository settings (Settings → Secrets and variables → Actions). Nothing here is required for a test APK:
 #   variables  GW_API_URL                       API the app talks to (default https://goworld.news/api/v1)
@@ -61,6 +62,7 @@ jobs:
       version_name: ${{ steps.version.outputs.version_name }}
       version_code: ${{ steps.version.outputs.version_code }}
       apk_name: ${{ steps.version.outputs.apk_name }}
+      release_tag: ${{ steps.version.outputs.release_tag }}
     env:
       HAS_UPLOAD_KEY: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_BASE64 != '' }}
       HAS_FIREBASE: ${{ secrets.GOOGLE_SERVICES_JSON_BASE64 != '' }}
@@ -81,11 +83,21 @@ jobs:
 
       - name: Version
         id: version
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
+          semver='^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$'
           base=$(node -p "require('./package.json').version")
+          [[ "$base" =~ $semver ]] || { echo "::error::package.json version '$base' is not MAJOR.MINOR.PATCH"; exit 1; }
+          tag=""
           if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
             name="${GITHUB_REF_NAME#v}"
-            [[ "$name" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]] || { echo "::error::Tag $GITHUB_REF_NAME is not vMAJOR.MINOR.PATCH"; exit 1; }
+            [[ "$name" =~ $semver ]] || { echo "::error::Tag $GITHUB_REF_NAME is not vMAJOR.MINOR.PATCH"; exit 1; }
+            tag="$GITHUB_REF_NAME"
+          elif [[ "$GITHUB_EVENT_NAME" == "push" && "$GITHUB_REF" == "refs/heads/main" ]] && ! gh release view "v$base" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            # first build of a new package.json version on main → publish it as release v<version>
+            name="$base"
+            tag="v$base"
           else
             name="${base}-build.${GITHUB_RUN_NUMBER}"
           fi
@@ -94,8 +106,9 @@ jobs:
             echo "version_name=$name"
             echo "version_code=$code"
             echo "apk_name=GO-World-News-v${name}.apk"
+            echo "release_tag=$tag"
           } >> "$GITHUB_OUTPUT"
-          echo "Building $name (versionCode $code) for $GW_API_URL"
+          echo "Building $name (versionCode $code) for $GW_API_URL${tag:+ → will publish release $tag}"
 
       - name: Firebase config (optional — Android push delivery)
         if: env.HAS_FIREBASE == 'true'
@@ -260,7 +273,7 @@ jobs:
   release:
     name: Publish GitHub Release
     needs: [apk, smoke]
-    if: always() && startsWith(github.ref, 'refs/tags/v') && needs.apk.result == 'success'
+    if: always() && needs.apk.result == 'success' && needs.apk.outputs.release_tag != ''
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -278,7 +291,7 @@ jobs:
       - name: Create or update the release
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.ref_name }}
+          TAG: ${{ needs.apk.outputs.release_tag }}
           APK_NAME: ${{ needs.apk.outputs.apk_name }}
           SMOKE: ${{ needs.smoke.result }}
         run: |
@@ -312,14 +325,14 @@ jobs:
             gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --notes-file notes.md "${flags[@]}"
             gh release upload "$TAG" --repo "$GITHUB_REPOSITORY" --clobber "${files[@]}"
           else
-            gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --title "GO World News $TAG (Android test build)" --notes-file notes.md --verify-tag "${flags[@]}" "${files[@]}"
+            gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --title "GO World News $TAG (Android test build)" --notes-file notes.md --target "$GITHUB_SHA" "${flags[@]}" "${files[@]}"
           fi
           echo "::notice title=Release published::$repo_url/releases/tag/$TAG"
 
   play-bundle:
     name: Google Play bundle (AAB, needs the upload key)
-    needs: checks
-    if: startsWith(github.ref, 'refs/tags/v')
+    needs: apk
+    if: needs.apk.outputs.release_tag != ''
     runs-on: ubuntu-latest
     timeout-minutes: 90
     env:
@@ -356,6 +369,9 @@ jobs:
           GW_UPLOAD_STORE_PASSWORD: ${{ secrets.ANDROID_UPLOAD_STORE_PASSWORD }}
           GW_UPLOAD_KEY_ALIAS: ${{ secrets.ANDROID_UPLOAD_KEY_ALIAS }}
           GW_UPLOAD_KEY_PASSWORD: ${{ secrets.ANDROID_UPLOAD_KEY_PASSWORD }}
+          GW_VERSION_NAME: ${{ needs.apk.outputs.version_name }}
+          GW_VERSION_CODE: ${{ needs.apk.outputs.version_code }}
+          TAG: ${{ needs.apk.outputs.release_tag }}
         run: |
           set -o pipefail
           npm ci
@@ -365,12 +381,11 @@ jobs:
             printf '%s' "$GOOGLE_SERVICES_JSON_BASE64" | base64 -d > "$RUNNER_TEMP/google-services.json"
             export GOOGLE_SERVICES_JSON="$RUNNER_TEMP/google-services.json"
           fi
-          export GW_VERSION_NAME="${GITHUB_REF_NAME#v}" GW_VERSION_CODE="$GITHUB_RUN_NUMBER"
           npx expo prebuild --platform android --clean --no-install
           cd android
           # store build: no server override, R8 on (Expo defaults), all CPU architectures
           ./gradlew bundleRelease --no-daemon -Dorg.gradle.jvmargs="-Xmx6g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8"
-          mkdir -p ../play && cp app/build/outputs/bundle/release/app-release.aab "../play/GO-World-News-${GITHUB_REF_NAME}-play.aab"
+          mkdir -p ../play && cp app/build/outputs/bundle/release/app-release.aab "../play/GO-World-News-${TAG}-play.aab"
           cp app/build/outputs/mapping/release/mapping.txt ../play/ 2>/dev/null || true
       - uses: actions/upload-artifact@v4
         if: env.HAS_UPLOAD_KEY == 'true'
