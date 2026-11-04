@@ -28,6 +28,14 @@ every job passed:
 
 ![v1.0.0 on the Android 14 emulator: Home, Latest, Live Updates, Settings](screenshots/emulator-v1.0.0.jpg)
 
+**v1.1.0** ([release page](https://github.com/hudayfa203/gotest/releases/tag/v1.1.0)) — built-in demo stories. Every job
+passed (versionCode 5, 92 MB, no crash, no JavaScript errors). On the Android 14 emulator Home showed the DEMO notice,
+the red bar with **BREAKING · 1/2** and **LIVE UPDATES · 2 live · 4 min ago**, the lead story with its bundled image;
+Latest, the Live hub, a full article and Settings (where notification settings correctly say they need a server)
+all rendered:
+
+![v1.1.0 on the Android 14 emulator: Home, Latest, Live Updates, article, Settings](screenshots/emulator-v1.1.0.jpg)
+
 Later builds: each release on the [Releases page](https://github.com/hudayfa203/gotest/releases) carries its own
 results and screenshots.
 
