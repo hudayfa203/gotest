@@ -5,10 +5,10 @@
 | Step | What it checks |
 |---|---|
 | Typecheck | strict TypeScript over the whole app, including generated typed routes |
-| Unit tests (Jest, 95 tests) | API client (headers, errors, withdrawn content, timeouts, non-API answers), offline sync, deep links, article block helpers, live-coverage merge logic and badges, version gate, server setting |
+| Unit tests (Jest, 101 tests) | API client (headers, errors, withdrawn content, timeouts, non-API answers), offline sync, deep links, article block helpers, live-coverage merge logic and badges, version gate, server setting, built-in demo stories (only demo items, current timestamps, paging/filters/search, live feeds, no fake server features) |
 | Release build | `expo prebuild` + Gradle `assembleRelease` with Hermes, new architecture, arm64-v8a + armeabi-v7a + x86_64 |
 | APK verification | package `news.goworld.app`, expected versionName/versionCode, APK Signature Scheme v2 valid, certificate fingerprint |
-| Emulator test (Android 14, Pixel 6 profile) | installs the APK, cold-starts it, opens Home, Latest, Live Updates and Settings, takes screenshots, reads the visible text, checks the process is alive and that logcat has no crash; Back button |
+| Emulator test (Android 14, Pixel 6 profile) | installs the APK, cold-starts it, opens Home, Latest, Live Updates, an article and Settings, takes screenshots, reads the visible text, checks the process is alive and that logcat has no crash; Back button |
 
 Each release's notes contain that build's results and its emulator screenshots.
 
@@ -62,8 +62,10 @@ The same app source was tested inside the full GO World News platform:
 
 ## Known issues
 
-1. **No content until the backend is online.** Every screen shows the honest "server could not be reached" state with
-   the server address (test builds). This is the main limitation of the current APK.
+1. **Demo stories, not real news, until the backend is online.** Test APKs show built-in fictional stories (labelled
+   DEMO). With *Settings → Content source → Use the default server* every screen shows the honest "couldn't reach
+   GO World News" state until the backend is deployed. In demo mode, sign-in, notification settings and bookmark sync
+   say they are not available (they need the server); live coverage does not receive new updates.
 2. **Test signing key.** GitHub APKs are signed with the React Native debug keystore (public, same for every build).
    Fine for side-loading; Play Protect warns about it; never upload such a build to Google Play. Adding the upload key
    changes the signature once (uninstall/reinstall needed).

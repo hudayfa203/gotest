@@ -18,10 +18,11 @@ the API within seconds.
 | API / CMS source | Complete and tested in the platform repository (delivered separately as the GO World News platform source; it is not in this app repository). |
 | **Deployed backend** | **None yet.** The platform has not been deployed to any server, and `goworld.news` is not connected to it. |
 | Address built into the APK | `https://goworld.news/api/v1` (repository variable `GW_API_URL` overrides it). |
+| Built-in demo stories | Test APKs open with fictional, DEMO-labelled sample content exported from the platform's demo seed (`src/demo`), so the app can be tried today. Store builds never contain it. |
 
-So today the installed app starts, shows its screens and explains that the server cannot be reached. It shows real
-news as soon as a deployed API is reachable — either at the built-in address, or at any address entered under
-**Settings → Server (test build)** in the APK from GitHub.
+So today the installed app shows the built-in demo stories. It shows real news as soon as a deployed API is reachable:
+**Settings → Content source → Use the default server**, or any address typed there. When the real server is the
+normal source, set the repository variable `GW_DEMO_CONTENT` to `available` (demo still selectable) or `off`.
 
 ## What it takes to bring the backend online (needs the owner's authorization)
 

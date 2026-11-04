@@ -11,7 +11,7 @@ import { ScreenHeader } from '../../src/components/ScreenHeader';
 import { Button } from '../../src/components/StateViews';
 import { Tap } from '../../src/components/Tap';
 import { Txt } from '../../src/components/Txt';
-import { ALLOW_SERVER_OVERRIDE, APP_VERSION, BUILD_API_URL, getApiUrl, getSiteUrl } from '../../src/config';
+import { ALLOW_SERVER_OVERRIDE, APP_VERSION, BUILD_API_URL, DEMO_CONTENT, getApiUrl, getSiteUrl, isDemoMode } from '../../src/config';
 import { mergeBookmarks } from '../../src/features/saved';
 import { useAppConfig } from '../../src/features/UpdateGate';
 import { clearQueue } from '../../src/lib/analytics';
@@ -19,7 +19,7 @@ import { confirmAsync, showMessage } from '../../src/lib/dialogs';
 import { haptic } from '../../src/lib/haptics';
 import { openExternal } from '../../src/lib/navigation';
 import { getPermissionState, getPushToken, PUSH_SUPPORTED, requestPermission, type PermissionState } from '../../src/push/notifications';
-import { applyServerOverride, checkServer, normalizeApiUrl, useServer, type ServerCheck } from '../../src/state/server';
+import { applyServerOverride, checkServer, CONTENT_SOURCE_SETTINGS, normalizeApiUrl, useServer, type ServerCheck } from '../../src/state/server';
 import { textScale, updateSettings, useSettings, type Appearance } from '../../src/state/settings';
 import { useTheme } from '../../src/state/theme';
 import { fonts, textScaleSteps } from '../../src/theme';
@@ -357,14 +357,15 @@ function AccountGroup() {
 }
 
 /**
- * Test builds only: point the installed app at another GO World News server (staging / self-hosted) without a rebuild.
- * Not compiled into store builds (ALLOW_SERVER_OVERRIDE is false there).
+ * Test builds only: choose where content comes from — the built-in demo stories, the server this build was made for,
+ * or another GO World News server (staging / self-hosted) without a rebuild. Not shown in store builds.
  */
-function ServerGroup() {
+function ContentSourceGroup() {
   const { c } = useTheme();
   const qc = useQueryClient();
   const apiUrl = useServer((s) => s.apiUrl);
   const overridden = useServer((s) => s.overridden);
+  const demo = useServer((s) => s.demo);
   const [draft, setDraft] = useState('');
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<{ url: string; check: ServerCheck } | null>(null);
@@ -382,15 +383,18 @@ function ServerGroup() {
     }
   };
 
-  const use = async (url: string | null) => {
+  const use = async (choice: string | null) => {
     setBusy(true);
     try {
-      await applyServerOverride(url, { resetCredentials: resetServerCredentials, clearCaches: clearAllCachedContent });
+      await applyServerOverride(choice, { resetCredentials: resetServerCredentials, clearCaches: clearAllCachedContent });
       await qc.invalidateQueries();
       setDraft('');
       setResult(null);
       haptic.success();
-      showMessage('Server changed', `The app now uses ${url ?? BUILD_API_URL}. Pull to refresh any open screen, or close and reopen the app.`);
+      showMessage(
+        'Content source changed',
+        choice === 'demo' ? 'The app now shows the built-in demo stories.' : `The app now uses ${choice ?? BUILD_API_URL}. Pull to refresh any open screen, or close and reopen the app.`,
+      );
     } finally {
       setBusy(false);
     }
@@ -407,51 +411,60 @@ function ServerGroup() {
 
   return (
     <Group
-      title="Server (test build)"
-      footer="This setting exists only in test builds from GitHub. It lets you point the app at a staging or self-hosted GO World News server without installing a new APK. Changing it signs you out and clears cached stories; saved stories stay on this phone."
+      title="Content source (test build)"
+      footer="Only in test builds from GitHub. The built-in demo stories are fictional sample content bundled in the app so it can be tried before the GO World News server is online. A server address switches the app to real content without installing a new APK. Changing the source signs you out and clears cached stories; saved stories stay on this phone."
     >
       <Row
         icon="broadcast"
-        title={overridden ? 'Custom server' : 'Default server'}
-        subtitle={apiUrl}
+        title={demo ? 'Built-in demo stories' : overridden ? 'Custom server' : 'Default server'}
+        subtitle={demo ? 'Fictional sample stories bundled in this test app — not real news' : apiUrl}
         right={busy ? <ActivityIndicator color={c.textMuted} /> : undefined}
       />
-      <Row
-        icon="refresh"
-        title="Test connection"
-        subtitle={result && result.url === apiUrl ? (result.check.ok ? `Connected · ${result.check.name ?? 'GO World News'} · ${result.check.ms} ms` : result.check.message) : 'Checks that this server answers'}
-        onPress={busy ? undefined : () => void test(apiUrl)}
-      />
-      <View style={{ paddingHorizontal: 14, paddingVertical: 12, gap: 10, borderBottomWidth: overridden ? 1 : 0, borderBottomColor: c.border }}>
-        <TextInput
-          value={draft}
-          onChangeText={(t) => {
-            setDraft(t);
-            setError(null);
-          }}
-          placeholder="staging.example.com or https://…/api/v1"
-          placeholderTextColor={c.textMuted}
-          keyboardType="url"
-          autoCapitalize="none"
-          autoCorrect={false}
-          returnKeyType="done"
-          onSubmitEditing={() => void saveDraft()}
-          accessibilityLabel="Server address"
-          style={{ minHeight: 46, borderRadius: 10, borderWidth: 1, borderColor: error ? c.danger : c.border, paddingHorizontal: 12, color: c.text, fontFamily: fonts.ui400, fontSize: 15, backgroundColor: c.bg }}
+      {DEMO_CONTENT !== 'off' && !demo ? (
+        <Row icon="saved" title="Show the built-in demo stories" subtitle="Works without a server" onPress={busy ? undefined : () => void use('demo')} />
+      ) : null}
+      {!demo ? (
+        <Row
+          icon="refresh"
+          title="Test connection"
+          subtitle={result && result.url === apiUrl ? (result.check.ok ? `Connected · ${result.check.name ?? 'GO World News'} · ${result.check.ms} ms` : result.check.message) : 'Checks that this server answers'}
+          onPress={busy ? undefined : () => void test(apiUrl)}
         />
-        {error ? (
-          <Txt variant="ui" size={12.5} color={c.danger}>
-            {error}
-          </Txt>
-        ) : null}
-        {result && result.url !== apiUrl && !result.check.ok ? (
-          <Txt variant="ui" size={12.5} color={c.danger}>
-            {result.check.message}
-          </Txt>
-        ) : null}
-        <Button title="Test and use this server" kind="secondary" disabled={busy || !draft.trim()} onPress={() => void saveDraft()} />
-      </View>
-      {overridden ? <Row icon="back" title="Back to the default server" subtitle={BUILD_API_URL} onPress={busy ? undefined : () => void use(null)} last /> : null}
+      ) : null}
+      {demo || overridden ? (
+        <Row icon="external" title="Use the default server" subtitle={BUILD_API_URL} onPress={busy ? undefined : () => void use(null)} last={!ALLOW_SERVER_OVERRIDE} />
+      ) : null}
+      {ALLOW_SERVER_OVERRIDE ? (
+        <View style={{ paddingHorizontal: 14, paddingVertical: 12, gap: 10 }}>
+          <TextInput
+            value={draft}
+            onChangeText={(t) => {
+              setDraft(t);
+              setError(null);
+            }}
+            placeholder="Another server: staging.example.com"
+            placeholderTextColor={c.textMuted}
+            keyboardType="url"
+            autoCapitalize="none"
+            autoCorrect={false}
+            returnKeyType="done"
+            onSubmitEditing={() => void saveDraft()}
+            accessibilityLabel="Server address"
+            style={{ minHeight: 46, borderRadius: 10, borderWidth: 1, borderColor: error ? c.danger : c.border, paddingHorizontal: 12, color: c.text, fontFamily: fonts.ui400, fontSize: 15, backgroundColor: c.bg }}
+          />
+          {error ? (
+            <Txt variant="ui" size={12.5} color={c.danger}>
+              {error}
+            </Txt>
+          ) : null}
+          {result && result.url !== apiUrl && !result.check.ok ? (
+            <Txt variant="ui" size={12.5} color={c.danger}>
+              {result.check.message}
+            </Txt>
+          ) : null}
+          <Button title="Test and use this server" kind="secondary" disabled={busy || !draft.trim()} onPress={() => void saveDraft()} />
+        </View>
+      ) : null}
     </Group>
   );
 }
@@ -509,7 +522,7 @@ export default function SettingsScreen() {
           />
         </Group>
 
-        {ALLOW_SERVER_OVERRIDE ? <ServerGroup /> : null}
+        {CONTENT_SOURCE_SETTINGS ? <ContentSourceGroup /> : null}
 
         <Group title="About GO World News">
           <Row icon="info" title="About us" onPress={page('about')} />
@@ -531,7 +544,7 @@ export default function SettingsScreen() {
           </Txt>
           {__DEV__ || ALLOW_SERVER_OVERRIDE ? (
             <Txt variant="ui" size={11} muted selectable>
-              API {getApiUrl()}
+              {isDemoMode() ? 'Content: built-in demo stories' : `API ${getApiUrl()}`}
             </Txt>
           ) : null}
         </View>

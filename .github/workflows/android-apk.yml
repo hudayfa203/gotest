@@ -8,6 +8,8 @@
 #
 # Optional repository settings (Settings → Secrets and variables → Actions). Nothing here is required for a test APK:
 #   variables  GW_API_URL                       API the app talks to (default https://goworld.news/api/v1)
+#              GW_DEMO_CONTENT                  built-in demo stories in test APKs: default (shown first, the default),
+#                                               available (selectable in Settings) or off
 #              EAS_PROJECT_ID                   Expo project id, enables push notification tokens
 #   secrets    ANDROID_UPLOAD_KEYSTORE_BASE64   upload key (.jks, base64) — Google Play signing; see docs/RELEASING.md
 #              ANDROID_UPLOAD_STORE_PASSWORD, ANDROID_UPLOAD_KEY_ALIAS, ANDROID_UPLOAD_KEY_PASSWORD
@@ -39,6 +41,7 @@ env:
   NODE_VERSION: '22'
   JAVA_VERSION: '17'
   GW_API_URL: ${{ inputs.api_url || vars.GW_API_URL || 'https://goworld.news/api/v1' }}
+  GW_DEMO_CONTENT: ${{ vars.GW_DEMO_CONTENT || 'default' }}
 
 jobs:
   checks:
@@ -152,8 +155,10 @@ jobs:
         working-directory: android
         env:
           EXPO_PUBLIC_API_URL: ${{ env.GW_API_URL }}
-          # test APKs can be pointed at another server from Settings → Server (never set for Play builds)
+          # test APKs: Settings → Content source can switch to another server, and they include the clearly labelled
+          # built-in demo stories (never set for Play builds)
           EXPO_PUBLIC_ALLOW_SERVER_OVERRIDE: '1'
+          EXPO_PUBLIC_DEMO_CONTENT: ${{ env.GW_DEMO_CONTENT }}
           NODE_ENV: production
           GW_UPLOAD_STORE_FILE: ${{ env.HAS_UPLOAD_KEY == 'true' && format('{0}/upload.jks', runner.temp) || '' }}
           GW_UPLOAD_STORE_PASSWORD: ${{ secrets.ANDROID_UPLOAD_STORE_PASSWORD }}
@@ -205,12 +210,18 @@ jobs:
           sha=$(cut -d' ' -f1 "dist/$APK_NAME.sha256")
           size=$(du -h "$apk" | cut -f1)
           if [ "$HAS_UPLOAD_KEY" = "true" ]; then signer="upload key (repository secret)"; else signer="test key (React Native debug keystore — side-loading only, never for Google Play)"; fi
+          case "$GW_DEMO_CONTENT" in
+            default) content="**Built-in demo stories** (fictional, labelled DEMO) until a server is chosen in Settings → Content source" ;;
+            available) content="Server; built-in demo stories selectable in Settings → Content source" ;;
+            *) content="Server only" ;;
+          esac
           cat > dist/build-info.md <<INFO
           | | |
           |---|---|
           | Version | **$VERSION_NAME** (versionCode $VERSION_CODE) |
           | Package | \`news.goworld.app\` |
-          | API server | \`$GW_API_URL\` — can be changed in the app under Settings → Server (test builds) |
+          | Content | $content |
+          | API server | \`$GW_API_URL\` — can be changed in the app under Settings → Content source (test builds) |
           | Android | $([ "$minsdk" = 24 ] && echo "7.0" || echo "API $minsdk")+ (minSdk $minsdk), targets API $target |
           | CPU | $abis |
           | Size | $size |

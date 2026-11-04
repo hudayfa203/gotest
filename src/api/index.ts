@@ -3,7 +3,7 @@
  * Device credential and reader session token are kept in SecureStore and cached in memory.
  */
 import * as Localization from 'expo-localization';
-import { APP_VERSION, getApiUrl, IS_WEB_PREVIEW, PLATFORM } from '../config';
+import { APP_VERSION, getApiUrl, IS_WEB_PREVIEW, isDemoMode, PLATFORM } from '../config';
 import { secure, SECURE_KEYS } from '../storage/secure';
 import type {
   AdResponse, AnalyticsEvent, AppConfig, Article, ArticlePage, Author, BreakingAlert, Bookmark, Category, Homepage,
@@ -60,8 +60,8 @@ function deviceInfo() {
 
 /** POST /devices once per install; the credential is stored in the keychain. Safe to call repeatedly. */
 export async function registerDevice(force = false): Promise<string | null> {
-  // the web preview is not an app install (and POST /devices is not CORS-enabled)
-  if (IS_WEB_PREVIEW) return null;
+  // the web preview is not an app install (and POST /devices is not CORS-enabled); demo stories need no server identity
+  if (IS_WEB_PREVIEW || isDemoMode()) return null;
   if (!force) {
     const existing = await getDeviceToken();
     if (existing) return existing;
@@ -83,8 +83,16 @@ export async function registerDevice(force = false): Promise<string | null> {
   return registering;
 }
 
+// Test builds with built-in demo stories: while they are selected, requests are answered by src/demo instead of the
+// network. The require is compiled out of builds without demo content (EXPO_PUBLIC_DEMO_CONTENT unset).
+const demo: typeof import('../demo') | null =
+  process.env.EXPO_PUBLIC_DEMO_CONTENT === 'default' || process.env.EXPO_PUBLIC_DEMO_CONTENT === 'available' ? require('../demo') : null;
+const appFetch: typeof fetch = (input, init) =>
+  demo && isDemoMode() ? demo.demoFetch(String(input), init as { method?: string }) : fetch(input, init);
+
 export const api = createApiClient({
   baseUrl: getApiUrl,
+  fetch: appFetch,
   getDeviceToken,
   getSessionToken,
   onDeviceUnauthorized: () => registerDevice(true),

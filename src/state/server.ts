@@ -4,16 +4,29 @@
  * The test APK published on GitHub is built with ALLOW_SERVER_OVERRIDE so a tester can point an installed app at a
  * staging or self-hosted backend without waiting for a new build. Store builds ignore all of this.
  */
-import { ALLOW_SERVER_OVERRIDE, BUILD_API_URL, getApiUrl, hasApiOverride, setApiOverride } from '../config';
+import { ALLOW_SERVER_OVERRIDE, BUILD_API_URL, DEMO_CONTENT, getApiUrl, hasApiOverride, isDemoMode, setApiOverride, setDemoMode } from '../config';
 import { kv } from '../storage/kv';
 import { createStore } from './store';
 
-const KEY = 'gw.server.override.v1';
+const KEY = 'gw.server.override.v1'; // 'demo' | 'server' | an API URL
 
 export type ServerCheck = { ok: true; name?: string; ms: number } | { ok: false; message: string };
 
-export const serverStore = createStore<{ apiUrl: string; overridden: boolean }>({ apiUrl: BUILD_API_URL, overridden: false });
-export const useServer = <S,>(sel: (s: { apiUrl: string; overridden: boolean }) => S) => serverStore.use(sel);
+export interface ServerState {
+  apiUrl: string;
+  /** a tester-entered server instead of the build-time one */
+  overridden: boolean;
+  /** the built-in demo stories are shown instead of any server */
+  demo: boolean;
+}
+export const serverStore = createStore<ServerState>({ apiUrl: BUILD_API_URL, overridden: false, demo: false });
+export const useServer = <S,>(sel: (s: ServerState) => S) => serverStore.use(sel);
+/** Settings shows the "Content source" section in test builds (server override and/or demo stories available). */
+export const CONTENT_SOURCE_SETTINGS = ALLOW_SERVER_OVERRIDE || DEMO_CONTENT !== 'off';
+
+const DEMO_CHOICE = 'demo';
+const SERVER_CHOICE = 'server';
+const publish = () => serverStore.set({ apiUrl: getApiUrl(), overridden: hasApiOverride(), demo: isDemoMode() });
 
 /**
  * Accepts what a tester is likely to type and returns the API base:
@@ -62,24 +75,41 @@ export async function checkServer(apiUrl: string, timeoutMs = 10_000): Promise<S
 
 /** Called once at start-up, before the first request (the root layout waits for settings, which waits for this). */
 export async function loadServerOverride() {
-  if (!ALLOW_SERVER_OVERRIDE) return;
+  if (!CONTENT_SOURCE_SETTINGS) return;
   const saved = await kv.getString(KEY).catch(() => null);
-  const n = saved ? normalizeApiUrl(saved) : null;
-  setApiOverride(n?.ok ? n.url : null);
-  serverStore.set({ apiUrl: getApiUrl(), overridden: hasApiOverride() });
+  if (saved === DEMO_CHOICE || (!saved && DEMO_CONTENT === 'default')) {
+    setDemoMode(true);
+    setApiOverride(null);
+  } else {
+    setDemoMode(false);
+    const n = saved && saved !== SERVER_CHOICE && ALLOW_SERVER_OVERRIDE ? normalizeApiUrl(saved) : null;
+    setApiOverride(n?.ok ? n.url : null);
+  }
+  publish();
 }
 
 /**
- * Switch servers (null = back to the build default). Content cached from the previous server, the device credential
- * and any reader session belong to that server, so they are dropped; saved articles stay on the phone.
+ * Switch the content source: 'demo' = built-in demo stories, null = the server this build was made for, or an API
+ * URL. Content cached from the previous source, the device credential and any reader session belong to it, so they
+ * are dropped; saved articles stay on the phone.
  */
-export async function applyServerOverride(apiUrl: string | null, deps: { clearCaches: () => Promise<void>; resetCredentials: () => Promise<void> }) {
-  if (!ALLOW_SERVER_OVERRIDE) return;
-  const next = apiUrl && apiUrl !== BUILD_API_URL ? apiUrl : null;
-  if (next) await kv.setString(KEY, next);
-  else await kv.remove(KEY);
-  setApiOverride(next);
-  serverStore.set({ apiUrl: getApiUrl(), overridden: hasApiOverride() });
+export async function applyServerOverride(
+  choice: string | null,
+  deps: { clearCaches: () => Promise<void>; resetCredentials: () => Promise<void> },
+) {
+  if (!CONTENT_SOURCE_SETTINGS) return;
+  if (choice === DEMO_CHOICE) {
+    if (DEMO_CONTENT === 'off') return;
+    await kv.setString(KEY, DEMO_CHOICE);
+    setDemoMode(true);
+    setApiOverride(null);
+  } else {
+    const url = choice && ALLOW_SERVER_OVERRIDE && choice !== BUILD_API_URL ? choice : null;
+    await kv.setString(KEY, url ?? SERVER_CHOICE);
+    setDemoMode(false);
+    setApiOverride(url);
+  }
+  publish();
   await deps.resetCredentials();
   await deps.clearCaches();
 }

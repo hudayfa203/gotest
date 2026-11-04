@@ -37,7 +37,8 @@ npx expo start --dev-client
 | `EAS_PROJECT_ID` | – | Expo/EAS project id (after `eas init`). Required for Expo push tokens. |
 | `EXPO_OWNER` | – | Expo account/organisation that owns the project (optional). |
 | `GOOGLE_SERVICES_JSON` | – | Path to Firebase `google-services.json` (Android push). |
-| `EXPO_PUBLIC_ALLOW_SERVER_OVERRIDE` | – | `1` in GitHub test APKs: adds *Settings → Server (test build)* to switch servers at runtime. Never set for store builds. |
+| `EXPO_PUBLIC_ALLOW_SERVER_OVERRIDE` | – | `1` in GitHub test APKs: *Settings → Content source* can switch to another server at runtime. Never set for store builds. |
+| `EXPO_PUBLIC_DEMO_CONTENT` | – | `default` / `available` in test APKs: built-in demo stories (`src/demo`, answered in place of the API by `src/demo/index.ts`). Never set for store builds. |
 | `GW_VERSION_NAME` / `GW_VERSION_CODE` | `1.0.0` / `1` | versionName and versionCode (CI: tag and run number). |
 | `GW_UPLOAD_STORE_FILE`, `GW_UPLOAD_STORE_PASSWORD`, `GW_UPLOAD_KEY_ALIAS`, `GW_UPLOAD_KEY_PASSWORD` | – | Android upload key for release signing (`plugins/withAndroidReleaseSigning.js`); without them release builds use the debug keystore. |
 

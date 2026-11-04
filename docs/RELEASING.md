@@ -20,6 +20,11 @@ which only ever goes up, so each new APK installs over the previous one.
 Another API server for one build: *Actions → Android APK → Run workflow → API base URL*. Permanently: repository
 variable `GW_API_URL` (*Settings → Secrets and variables → Actions → Variables*).
 
+Built-in demo stories in test APKs: repository variable `GW_DEMO_CONTENT` — `default` (today: the app opens with them),
+`available` (the server is the default, demo stories can still be chosen in Settings) or `off`. Google Play bundles never
+include them. The stories are exported from the platform's demo seed with `scripts/export-app-demo.mjs` (platform
+repository) into `src/demo/`.
+
 ## Google Play (when you are ready)
 
 Google Play needs an **Android App Bundle (.aab)** signed with your own **upload key**. The workflow builds it on

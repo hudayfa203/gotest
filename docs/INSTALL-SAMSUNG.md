@@ -41,21 +41,21 @@ or Google Play. If it is on, the install button does nothing or you see *"Blocke
 
 ## 4. First start — what you should see
 
-- **If the GO World News backend is online:** Home loads with stories, the red BREAKING banner (when there is breaking
-  news) and the LIVE UPDATES strip (when coverage is live).
-- **If it is not online yet** (the situation today — see [BACKEND.md](BACKEND.md)): screens show *"Couldn't load
-  this — the server could not be reached"* and, because this is a test build, the server address and a pointer to
-  *Settings → Server*. The app itself is working; it has no news source yet.
+Home opens with the **built-in demo stories**: a yellow **DEMO** notice at the top, the red bar with two rotating
+**BREAKING** alerts and **LIVE UPDATES · 2 live**, then the lead story, top stories, latest, regions, video, opinion and
+podcasts. Every item has a **DEMO** badge — they are fictional sample stories bundled in the app, not real news, and
+they work without internet. Try: tap the red bar, open a live coverage, search for "port", play the video, save a story.
 
-### Pointing the app at a server (test builds only)
+### Switching to the real server (test builds only)
 
-1. Tap the ⚙ (top right on Home) → scroll to **Server (test build)**.
-2. Type the server address, e.g. `staging.example.com` — `https://` and `/api/v1` are added automatically.
-3. Tap **Test and use this server**. The app checks that the address answers like a GO World News API before
-   switching; then pull down to refresh, or close and reopen the app.
-4. **Back to the default server** returns to the address the APK was built with.
+1. Tap the ⚙ (top right on Home) → scroll to **Content source (test build)**.
+2. **Use the default server** switches to `https://goworld.news/api/v1` — use it once the backend is online
+   ([BACKEND.md](BACKEND.md)). Until then that choice shows *"Couldn't reach GO World News"*.
+3. Or type another server address, e.g. `staging.example.com` (`https://` and `/api/v1` are added) → **Test and use
+   this server**. The app checks that it answers like a GO World News API before switching.
+4. **Show the built-in demo stories** switches back.
 
-Changing the server signs you out and clears cached stories (they belonged to the other server). Saved stories stay.
+Changing the source signs you out and clears cached stories (they belonged to the other source). Saved stories stay.
 
 ### Notifications
 

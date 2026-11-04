@@ -8,7 +8,7 @@ import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persi
 import { focusManager, onlineManager, QueryClient } from '@tanstack/react-query';
 import type { PersistQueryClientOptions } from '@tanstack/react-query-persist-client';
 import { AppState, Platform } from 'react-native';
-import { APP_VERSION, getApiUrl } from '../config';
+import { APP_VERSION, getApiUrl, isDemoMode } from '../config';
 import { subscribeNetwork } from '../lib/network';
 import { isGone, isNetworkError, ApiError } from './client';
 
@@ -46,9 +46,9 @@ const PERSISTED_ROOTS = new Set(['home', 'latest', 'article', 'config', 'navigat
 export const persistOptions: Omit<PersistQueryClientOptions, 'queryClient'> = {
   persister,
   maxAge: 7 * DAY,
-  // a cache restored after a restart must come from the same app version *and* the same server (test builds can switch)
+  // a cache restored after a restart must come from the same app version *and* the same source (test builds can switch)
   get buster() {
-    return `${APP_VERSION}|${getApiUrl()}`;
+    return `${APP_VERSION}|${isDemoMode() ? 'demo' : getApiUrl()}`;
   },
   dehydrateOptions: {
     shouldDehydrateQuery: (q) => q.state.status === 'success' && PERSISTED_ROOTS.has(String(q.queryKey[0])),

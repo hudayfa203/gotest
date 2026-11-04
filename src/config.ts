@@ -19,6 +19,22 @@ export const BUILD_API_URL = trimSlash(
  */
 export const ALLOW_SERVER_OVERRIDE = process.env.EXPO_PUBLIC_ALLOW_SERVER_OVERRIDE === '1';
 
+/**
+ * Built-in demo stories (src/demo) in test builds: EXPO_PUBLIC_DEMO_CONTENT = 'default' (shown until a server is
+ * chosen in Settings → Content source), 'available' (selectable, not the default) or unset/'off' (store builds).
+ */
+const DEMO_ENV = process.env.EXPO_PUBLIC_DEMO_CONTENT;
+export const DEMO_CONTENT: 'off' | 'available' | 'default' = DEMO_ENV === 'default' || DEMO_ENV === 'available' ? DEMO_ENV : 'off';
+
+let demoActive = false;
+/** true while the app shows the built-in demo stories instead of talking to a server */
+export function isDemoMode() {
+  return demoActive;
+}
+export function setDemoMode(on: boolean) {
+  demoActive = DEMO_CONTENT !== 'off' && on;
+}
+
 let apiOverride: string | null = null;
 
 /** Current API base: the tester's override (test builds) or the build-time server. Read per request. */

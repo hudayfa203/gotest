@@ -49,6 +49,6 @@ export function EmptyState({ icon = 'info', title, body, action, style }: { icon
 
 export function ErrorState({ error, onRetry, style, title = 'Couldn’t load this' }: { error: unknown; onRetry?: () => void; style?: ViewStyle; title?: string }) {
   // test builds: say which server failed, and where to change it (Settings → Server)
-  const body = ALLOW_SERVER_OVERRIDE && isNetworkError(error) ? `${describeError(error)}\n\nTest build · server: ${getApiUrl()}\nChange it in Settings → Server.` : describeError(error);
+  const body = ALLOW_SERVER_OVERRIDE && isNetworkError(error) ? `${describeError(error)}\n\nTest build · server: ${getApiUrl()}\nChange it in Settings → Content source.` : describeError(error);
   return <EmptyState icon="alert" title={title} body={body} action={onRetry ? { title: 'Try again', onPress: onRetry } : undefined} style={style} />;
 }

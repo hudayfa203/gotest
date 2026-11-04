@@ -4,8 +4,9 @@
 #   android-smoke-test.sh <apk> <output-dir>
 #
 # Installs the APK on the running emulator, cold-starts it, opens the main screens through the app's own deep links
-# (goworldnews://latest, ://live, ://settings), and records for each screen: a screenshot, the visible text (from
-# uiautomator) and whether the app process is still alive. Fails on install errors, crashes and dead processes.
+# (goworldnews://latest, ://live, an article, ://settings), and records for each screen: a screenshot, the visible text (from
+# uiautomator) and whether the app process is still alive. Test APKs open with the built-in demo stories, so content
+# screens should show stories; with a server configured they show what that server returns. Fails on install errors, crashes and dead processes.
 # Network-dependent content is reported, not judged: the emulator may not be able to reach the configured API server.
 set -uo pipefail
 
@@ -77,7 +78,9 @@ sleep 25
 capture "01-home" "Home (cold start)"
 open_link "goworldnews://latest" "02-latest" "Latest" 10
 open_link "goworldnews://live" "03-live" "Live Updates" 10
-open_link "goworldnews://settings" "04-settings" "Settings" 8
+ARTICLE_ID="$(node -p "(require('./src/demo/snapshot.json').summaries.find((s) => s.type === 'news') || {}).id || ''" 2>/dev/null || true)"
+if [ -n "$ARTICLE_ID" ]; then open_link "goworldnews://article/$ARTICLE_ID" "04-article" "Article ($ARTICLE_ID)" 10; fi
+open_link "goworldnews://settings" "05-settings" "Settings" 8
 adb shell input keyevent KEYCODE_BACK >/dev/null 2>&1 || true
 sleep 3
 alive || fail "The app stopped after pressing Back"

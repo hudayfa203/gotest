@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { endpoints } from '../../src/api';
 import { AdCard } from '../../src/components/AdCard';
 import { BreakingBanner, activeAlerts } from '../../src/components/BreakingBanner';
+import { DemoNotice } from '../../src/components/DemoNotice';
 import { MAX_FEED_WIDTH } from '../../src/components/cards';
 import { OfflineBanner } from '../../src/components/OfflineBanner';
 import { LiveUpdatesEntry } from '../../src/components/live/LiveUpdatesEntry';
@@ -122,13 +123,13 @@ function Home() {
   // entry shows ongoing coverage only (and nothing when the home data is too old to vouch for it).
   const breaking = activeAlerts(home.data?.breaking, now);
   const liveItems = liveEntryItems(home.data?.liveNow, home.dataUpdatedAt, now);
-  const topAlerts =
-    breaking.length || liveItems.length ? (
-      <View>
-        {breaking.length ? <BreakingBanner alerts={breaking} attachedBelow={liveItems.length > 0} /> : null}
-        <LiveUpdatesEntry items={liveItems} attached={breaking.length > 0} />
-      </View>
-    ) : undefined;
+  const topAlerts = (
+    <View>
+      <DemoNotice />
+      {breaking.length ? <BreakingBanner alerts={breaking} attachedBelow={liveItems.length > 0} /> : null}
+      {liveItems.length ? <LiveUpdatesEntry items={liveItems} attached={breaking.length > 0} /> : null}
+    </View>
+  );
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>
       {header}
