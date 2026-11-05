@@ -4,7 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState, Platform, Share, View, useWindowDimensions } from 'react-native';
 import Animated, {
-  Extrapolation, FadeIn, FadeInDown, FadeOutUp, interpolate, useAnimatedReaction, useAnimatedRef, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue,
+  Extrapolation, FadeInDown, FadeOutUp, interpolate, useAnimatedReaction, useAnimatedRef, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { scheduleOnRN } from 'react-native-worklets';
@@ -357,7 +357,7 @@ function ArticleScreen() {
       >
         {heroH && article.image ? (
           <View style={{ height: heroH, overflow: 'hidden', backgroundColor: '#061A40' }}>
-            <Animated.View entering={FadeIn.duration(260)} style={heroStyle}>
+            <Animated.View style={heroStyle}>
               <ArticleImage image={article.image} width={width} ratio={width / heroH} priority="high" />
             </Animated.View>
           </View>
@@ -371,7 +371,8 @@ function ArticleScreen() {
           </Txt>
         ) : null}
 
-        <Animated.View entering={FadeInDown.duration(320).delay(60)} onLayout={(e) => setColY(e.nativeEvent.layout.y)} style={{ width: readW, alignSelf: 'center', paddingTop: 20, gap: 20 }}>
+        {/* no entrance animation: on Android a layout animation here could leave the story invisible */}
+        <View onLayout={(e) => setColY(e.nativeEvent.layout.y)} style={{ width: readW, alignSelf: 'center', paddingTop: 20, gap: 20 }}>
           {showOfflineNote ? (
             <View accessibilityRole="text" style={{ flexDirection: 'row', gap: 8, alignItems: 'center', backgroundColor: c.surface, borderRadius: 10, padding: 10 }}>
               <Icon name="offline" size={16} color={c.textMuted} />
@@ -417,7 +418,7 @@ function ArticleScreen() {
           <RelatedStories items={related} />
           <MoreFromSection a={article} exclude={new Set(related.map((r) => r.id))} />
           <MostRead excludeId={article.id} />
-        </Animated.View>
+        </View>
       </Animated.ScrollView>
       <AnchorAd />
     </View>

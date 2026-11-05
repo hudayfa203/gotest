@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useRef, useState } from 'react';
 import { View, type HostInstance } from 'react-native';
-import Animated, { FadeInDown, FadeOutDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { endpoints } from '../api';
 import { useAppConfig } from '../features/UpdateGate';
@@ -136,11 +135,9 @@ export function AnchorAd({ placement = 'app_article_sticky' }: { placement?: App
   const w = Math.min(full - 64, 468);
   const h = Math.round(w / ratio);
   return (
-    <Animated.View
+    <View
       ref={ref}
       collapsable={false}
-      entering={FadeInDown.delay(900).duration(300)}
-      exiting={FadeOutDown.duration(200)}
       style={{ position: 'absolute', left: 0, right: 0, bottom: 0, paddingBottom: insets.bottom + 6, paddingTop: 6, backgroundColor: c.surfaceRaised, borderTopWidth: 1, borderTopColor: c.border, alignItems: 'center', zIndex: 30 }}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
@@ -163,7 +160,7 @@ export function AnchorAd({ placement = 'app_article_sticky' }: { placement?: App
           <Icon name="close" size={16} color={c.textMuted} />
         </Tap>
       </View>
-    </Animated.View>
+    </View>
   );
 }
 

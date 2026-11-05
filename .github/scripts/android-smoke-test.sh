@@ -101,7 +101,14 @@ capture "01-home" "Home (cold start)"
 open_link "goworldnews://latest" "02-latest" "Latest" 10
 open_link "goworldnews://live" "03-live" "Live Updates" 10
 ARTICLE_ID="$(node -p "(require('./src/demo/snapshot.json').summaries.find((s) => s.type === 'news') || {}).id || ''" 2>/dev/null || true)"
-if [ -n "$ARTICLE_ID" ]; then open_link "goworldnews://article/$ARTICLE_ID" "04-article" "Article ($ARTICLE_ID)" 10; fi
+if [ -n "$ARTICLE_ID" ]; then
+  open_link "goworldnews://article/$ARTICLE_ID" "04-article" "Article ($ARTICLE_ID)" 10
+  # the story text itself must be on screen (not just the header/toolbar): look for the start of its standfirst
+  SNIPPET="$(node -p "((require('./src/demo/snapshot.json').summaries.find((s) => s.id === '$ARTICLE_ID') || {}).standfirst || '').split(/['\"&<>]/)[0].slice(0, 28)" 2>/dev/null || true)"
+  if [ -n "$SNIPPET" ]; then
+    if grep -qF "$SNIPPET" "$OUT/04-article.xml" 2>/dev/null; then say "- ✅ Article text is visible"; else fail "Article text is not visible on the story screen (looked for: \"$SNIPPET\")"; fi
+  fi
+fi
 open_link "goworldnews://settings" "05-settings" "Settings" 8
 adb shell input keyevent KEYCODE_BACK >/dev/null 2>&1 || true
 sleep 3
