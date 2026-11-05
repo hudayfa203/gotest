@@ -183,7 +183,7 @@ function NotificationsGroup() {
       if (p !== 'granted') p = await requestPermission();
       setPerm(p);
       if (p !== 'granted') {
-        setMessage(p === 'denied' ? 'Notifications are turned off for GO World News in your device settings.' : 'Permission was not granted.');
+        setMessage(p === 'denied' ? 'Notifications are turned off for Garowe World in your device settings.' : 'Permission was not granted.');
         return;
       }
       const tok = await getPushToken();
@@ -311,7 +311,7 @@ function AccountGroup() {
   const deleteAccount = async () => {
     const ok = await confirmAsync(
       'Delete your reader account?',
-      'This permanently deletes your GO World News reader account, its sign-in sessions and the saved-stories list stored on our servers. Stories saved on this device are kept until you remove them. This cannot be undone.',
+      'This permanently deletes your Garowe World reader account, its sign-in sessions and the saved-stories list stored on our servers. Stories saved on this device are kept until you remove them. This cannot be undone.',
       'Delete account',
       true,
     );
@@ -358,7 +358,7 @@ function AccountGroup() {
 
 /**
  * Test builds only: choose where content comes from — the built-in demo stories, the server this build was made for,
- * or another GO World News server (staging / self-hosted) without a rebuild. Not shown in store builds.
+ * or another Garowe World server (staging / self-hosted) without a rebuild. Not shown in store builds.
  */
 function ContentSourceGroup() {
   const { c } = useTheme();
@@ -412,7 +412,7 @@ function ContentSourceGroup() {
   return (
     <Group
       title="Content source (test build)"
-      footer="Only in test builds from GitHub. The built-in demo stories are fictional sample content bundled in the app so it can be tried before the GO World News server is online. A server address switches the app to real content without installing a new APK. Changing the source signs you out and clears cached stories; saved stories stay on this phone."
+      footer="Only in test builds from GitHub. The built-in demo stories are fictional sample content bundled in the app so it can be tried before the Garowe World server is online. A server address switches the app to real content without installing a new APK. Changing the source signs you out and clears cached stories; saved stories stay on this phone."
     >
       <Row
         icon="broadcast"
@@ -427,7 +427,7 @@ function ContentSourceGroup() {
         <Row
           icon="refresh"
           title="Test connection"
-          subtitle={result && result.url === apiUrl ? (result.check.ok ? `Connected · ${result.check.name ?? 'GO World News'} · ${result.check.ms} ms` : result.check.message) : 'Checks that this server answers'}
+          subtitle={result && result.url === apiUrl ? (result.check.ok ? `Connected · ${result.check.name ?? 'Garowe World'} · ${result.check.ms} ms` : result.check.message) : 'Checks that this server answers'}
           onPress={busy ? undefined : () => void test(apiUrl)}
         />
       ) : null}
@@ -524,7 +524,7 @@ export default function SettingsScreen() {
 
         {CONTENT_SOURCE_SETTINGS ? <ContentSourceGroup /> : null}
 
-        <Group title="About GO World News">
+        <Group title="About Garowe World">
           <Row icon="info" title="About us" onPress={page('about')} />
           <Row icon="check" title="Editorial standards & corrections" onPress={page('editorialStandards')} />
           <Row icon="info" title="Privacy policy" onPress={page('privacy')} />
@@ -536,7 +536,7 @@ export default function SettingsScreen() {
 
         <View style={{ alignItems: 'center', marginTop: 28, gap: 4 }}>
           <Txt variant="ui" size={12.5} muted>
-            GO World News {APP_VERSION}
+            Garowe World {APP_VERSION}
             {build ? ` (${build})` : ''}
           </Txt>
           <Txt variant="ui" size={11.5} muted>

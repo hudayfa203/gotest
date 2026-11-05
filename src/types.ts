@@ -47,6 +47,7 @@ export type Block =
   | { type: 'quote'; children: Inline[]; attribution?: string }
   | { type: 'list'; ordered: boolean; items: Inline[][] }
   | { type: 'image'; image: ImageRef }
+  | { type: 'gallery'; images: ImageRef[]; caption?: string }
   | { type: 'video'; provider: VideoProvider; videoId: string; url?: string; title: string; poster?: ImageRef }
   | { type: 'embed'; provider: EmbedProvider; url: string; html?: string }
   | { type: 'table'; caption?: string; header: string[]; rows: string[][] }

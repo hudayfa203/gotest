@@ -14,7 +14,7 @@ export const BUILD_API_URL = trimSlash(
 
 /**
  * Test builds only (EXPO_PUBLIC_ALLOW_SERVER_OVERRIDE=1, set by the GitHub test-APK workflow): the tester can point the
- * installed app at another GO World News server from Settings → Server, without a rebuild. Store/Play builds never set
+ * installed app at another Garowe World server from Settings → Server, without a rebuild. Store/Play builds never set
  * this flag, so a production install always talks to the server it was built for.
  */
 export const ALLOW_SERVER_OVERRIDE = process.env.EXPO_PUBLIC_ALLOW_SERVER_OVERRIDE === '1';

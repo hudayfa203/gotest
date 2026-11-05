@@ -122,7 +122,7 @@ export default function ExploreScreen() {
           onChangeText={setText}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
-          placeholder="Search GO World News"
+          placeholder="Search Garowe World"
           placeholderTextColor={c.textMuted}
           returnKeyType="search"
           autoCapitalize="none"

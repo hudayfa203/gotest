@@ -22,13 +22,13 @@ export function UpdateGate({ children }: { children: ReactNode }) {
   const storeName = Platform.OS === 'ios' ? 'the App Store' : Platform.OS === 'android' ? 'Google Play' : 'the App Store or Google Play';
   return (
     <View style={{ flex: 1, backgroundColor: '#061A40', paddingTop: insets.top + 40, paddingBottom: insets.bottom + 24, paddingHorizontal: 28, justifyContent: 'space-between' }} accessibilityViewIsModal>
-      <Image source={require('../../assets/images/logo-primary-reversed.png')} style={{ width: 240, height: 60 }} contentFit="contain" accessibilityLabel="GO World News" />
+      <Image source={require('../../assets/images/logo-primary-reversed.png')} style={{ width: 240, height: 60 }} contentFit="contain" accessibilityLabel="Garowe World" />
       <View style={{ gap: 14 }}>
         <Txt variant="display" size={30} color="#FFFFFF" accessibilityRole="header">
           Update required
         </Txt>
         <Txt variant="body" size={16} lineHeight={24} color="rgba(255,255,255,0.85)">
-          This version of GO World News ({APP_VERSION}) is no longer supported. Please install the latest version (minimum {data.minSupportedAppVersion}) to keep reading.
+          This version of Garowe World ({APP_VERSION}) is no longer supported. Please install the latest version (minimum {data.minSupportedAppVersion}) to keep reading.
         </Txt>
       </View>
       {storeUrl ? (

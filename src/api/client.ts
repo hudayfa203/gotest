@@ -1,5 +1,5 @@
 /**
- * Minimal, dependency-free API client for GO World News API v1 (docs/API.md).
+ * Minimal, dependency-free API client for Garowe World API v1 (docs/API.md).
  * Pure module: everything platform-specific (fetch, tokens) is injected, so it is unit-tested.
  */
 import type { Tombstone } from '../types';
@@ -158,7 +158,7 @@ export function createApiClient(deps: ApiClientDeps) {
     if (res.ok) {
       // a 2xx that is not JSON is not our API: a captive Wi-Fi login page, a parked domain, a wrong server address
       if (text && data === undefined) {
-        throw new ApiError(res.status, 'INVALID_RESPONSE', 'The server sent an answer that is not GO World News data. On public Wi-Fi, open your browser and sign in to the network first.');
+        throw new ApiError(res.status, 'INVALID_RESPONSE', 'The server sent an answer that is not Garowe World data. On public Wi-Fi, open your browser and sign in to the network first.');
       }
       return data as T;
     }

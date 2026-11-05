@@ -33,7 +33,7 @@ def gwUploadStoreFile = gwSetting('GW_UPLOAD_STORE_FILE')
 if (gwUploadStoreFile && !file(gwUploadStoreFile).exists()) {
     throw new GradleException("GW_UPLOAD_STORE_FILE points to a missing file: " + gwUploadStoreFile)
 }
-println(gwUploadStoreFile ? "GO World News: release builds are signed with the upload key" : "GO World News: no upload key configured - release builds use the debug keystore (side-load testing only, not for Google Play)")
+println(gwUploadStoreFile ? "Garowe World: release builds are signed with the upload key" : "Garowe World: no upload key configured - release builds use the debug keystore (side-load testing only, not for Google Play)")
 
 android {`,
   );

@@ -38,7 +38,7 @@ export function Masthead({ compactLogo = false }: { compactLogo?: boolean }) {
   return (
     <View style={{ height: MASTHEAD_H, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 4 }}>
       <IconButton icon="menu" label="Menu" onPress={openMenu} size={24} />
-      <Tap onPress={() => router.navigate('/' as Href)} accessibilityRole="link" accessibilityLabel="GO World News, home" style={{ paddingHorizontal: 4, paddingVertical: 6 }}>
+      <Tap onPress={() => router.navigate('/' as Href)} accessibilityRole="link" accessibilityLabel="Garowe World, home" style={{ paddingHorizontal: 4, paddingVertical: 6 }}>
         <Image
           source={isDark ? require('../../assets/images/logo-oneline-reversed.png') : require('../../assets/images/logo-oneline.png')}
           style={{ width: compactLogo ? 150 : 172, height: compactLogo ? 23 : 27 }}

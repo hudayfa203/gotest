@@ -178,7 +178,7 @@ function HomeFooter({ updatedAt, tagline }: { updatedAt: string; tagline?: strin
         Updated {formatTime(updatedAt)}. Pull down to refresh.
       </Txt>
       <Txt variant="ui" size={12} muted>
-        © {new Date().getFullYear()} GO World News
+        © {new Date().getFullYear()} Garowe World
       </Txt>
     </View>
   );

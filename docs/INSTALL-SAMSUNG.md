@@ -1,10 +1,10 @@
-# Install GO World News on a Samsung phone (APK from GitHub)
+# Install Garowe World on a Samsung phone (APK from GitHub)
 
 Works on any Samsung Galaxy phone or tablet with **Android 7.0 or newer** (One UI 1 and later). Other Android
 phones work the same way; only the menu names differ slightly.
 
 **Direct download (always the newest release):**
-https://github.com/hudayfa203/gotest/releases/latest/download/GO-World-News.apk
+https://github.com/hudayfa203/gotest/releases/latest/download/Garowe-World.apk
 
 A specific version, its checksum and the emulator screenshots are on
 [the Releases page](https://github.com/hudayfa203/gotest/releases).
@@ -29,7 +29,7 @@ or Google Play. If it is on, the install button does nothing or you see *"Blocke
 
 ## 3. Install
 
-1. Tap the finished download in the notification shade, or open **My Files → Downloads → GO-World-News…apk**.
+1. Tap the finished download in the notification shade, or open **My Files → Downloads → Garowe-World…apk**.
 2. The first time, Android says *"For your security, your phone is not allowed to install unknown apps from this
    source"*. Tap **Settings**, switch **Allow from this source** on, and go back. (Samsung path, if you need it later:
    *Settings → Apps → ⋮ → Special access → Install unknown apps → Chrome / Samsung Internet / My Files*.)
@@ -37,7 +37,7 @@ or Google Play. If it is on, the install button does nothing or you see *"Blocke
 4. **Google Play Protect** may show *"Unsafe app blocked"* or *"App scan recommended"*, because it does not know the
    test signing key. Tap **More details → Install anyway** (or **Scan app**, then install). This is expected for a
    side-loaded test build and does not appear for the Google Play version.
-5. Tap **Open**. The GO World News splash screen appears, then Home.
+5. Tap **Open**. The Garowe World splash screen appears, then Home.
 
 ## 4. First start — what you should see
 
@@ -50,9 +50,9 @@ they work without internet. Try: tap the red bar, open a live coverage, search f
 
 1. Tap the ⚙ (top right on Home) → scroll to **Content source (test build)**.
 2. **Use the default server** switches to `https://goworld.news/api/v1` — use it once the backend is online
-   ([BACKEND.md](BACKEND.md)). Until then that choice shows *"Couldn't reach GO World News"*.
+   ([BACKEND.md](BACKEND.md)). Until then that choice shows *"Couldn't reach Garowe World"*.
 3. Or type another server address, e.g. `staging.example.com` (`https://` and `/api/v1` are added) → **Test and use
-   this server**. The app checks that it answers like a GO World News API before switching.
+   this server**. The app checks that it answers like a Garowe World API before switching.
 4. **Show the built-in demo stories** switches back.
 
 Changing the source signs you out and clears cached stories (they belonged to the other source). Saved stories stay.
@@ -74,12 +74,12 @@ build, or when switching between the GitHub APK and a Google Play install).
 
 ## 6. Uninstalling
 
-*Settings → Apps → GO World News → Uninstall*, or long-press the icon → *Uninstall*.
+*Settings → Apps → Garowe World → Uninstall*, or long-press the icon → *Uninstall*.
 
 ## 7. Checking the file (optional)
 
 Each release lists the APK's **SHA-256** and the signing certificate's SHA-256, and includes a `.sha256` file.
-On a computer: `sha256sum GO-World-News-v1.0.0.apk` (Linux), `shasum -a 256 …` (macOS) or
+On a computer: `sha256sum Garowe-World-v1.0.0.apk` (Linux), `shasum -a 256 …` (macOS) or
 `Get-FileHash … -Algorithm SHA256` (Windows) must print the same value.
 
 ## Troubleshooting
@@ -87,7 +87,7 @@ On a computer: `sha256sum GO-World-News-v1.0.0.apk` (Linux), `shasum -a 256 …`
 | What you see | What to do |
 |---|---|
 | Nothing happens when tapping Install | Auto Blocker is on (step 1), or the download is incomplete — download again |
-| "App not installed" | Free some storage (the app needs ~200 MB during install); if a GO World News app from another source is installed, uninstall it first |
+| "App not installed" | Free some storage (the app needs ~200 MB during install); if a Garowe World app from another source is installed, uninstall it first |
 | "There was a problem parsing the package" | The file is incomplete or the phone runs Android 6 or older |
 | Stories never load | The backend is not reachable — see [BACKEND.md](BACKEND.md); check *Settings → Server → Test connection* |
-| "The server sent an answer that is not GO World News data" | You are on public Wi-Fi that needs a browser sign-in, or the server address is wrong |
+| "The server sent an answer that is not Garowe World data" | You are on public Wi-Fi that needs a browser sign-in, or the server address is wrong |

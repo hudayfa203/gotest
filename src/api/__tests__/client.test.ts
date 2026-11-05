@@ -75,7 +75,7 @@ describe('responses and error mapping', () => {
     const err = (await api.request('/home').catch((e: unknown) => e)) as ApiError;
     expect(err).toBeInstanceOf(ApiError);
     expect(err.code).toBe('INVALID_RESPONSE');
-    expect(describeError(err)).toMatch(/not GO World News data/);
+    expect(describeError(err)).toMatch(/not Garowe World data/);
   });
   it('handles non-JSON error bodies', async () => {
     const f = mockFetch([() => new Response('<html>Bad gateway</html>', { status: 502, statusText: 'Bad Gateway' })]);

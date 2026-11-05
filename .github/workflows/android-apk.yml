@@ -1,4 +1,4 @@
-# GO World News — Android build pipeline
+# Garowe World — Android build pipeline
 #
 #   pull request / push to main  → typecheck + unit tests → release APK (workflow artifact) → emulator smoke test
 #   push to main with a new "version" in package.json (no release vX.Y.Z yet), or push a tag vX.Y.Z
@@ -110,7 +110,7 @@ jobs:
           {
             echo "version_name=$name"
             echo "version_code=$code"
-            echo "apk_name=GO-World-News-v${name}.apk"
+            echo "apk_name=Garowe-World-v${name}.apk"
             echo "release_tag=$tag"
           } >> "$GITHUB_OUTPUT"
           echo "Building $name (versionCode $code) for $GW_API_URL${tag:+ → will publish release $tag}"
@@ -205,7 +205,7 @@ jobs:
           abis=$(sed -n "s/^native-code: //p" "$RUNNER_TEMP/badging.txt" | tr -d "'")
           mkdir -p dist
           cp "$apk" "dist/$APK_NAME"
-          cp "$apk" dist/GO-World-News.apk
+          cp "$apk" dist/Garowe-World.apk
           (cd dist && sha256sum "$APK_NAME" > "$APK_NAME.sha256")
           sha=$(cut -d' ' -f1 "dist/$APK_NAME.sha256")
           size=$(du -h "$apk" | cut -f1)
@@ -266,7 +266,7 @@ jobs:
           profile: pixel_6
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none
-          script: bash .github/scripts/android-smoke-test.sh dist/GO-World-News.apk smoke
+          script: bash .github/scripts/android-smoke-test.sh dist/Garowe-World.apk smoke
       - name: Verdict
         if: always()
         run: |
@@ -318,7 +318,7 @@ jobs:
             warn="> ⚠️ The automatic emulator test did not pass for this build ($SMOKE), so it is marked as a pre-release. Read the report below before installing."
           fi
           {
-            echo "## GO World News for Android — $TAG"
+            echo "## Garowe World for Android — $TAG"
             echo
             [ -n "$warn" ] && { echo "$warn"; echo; }
             echo "**Download:** [\`$APK_NAME\`]($repo_url/releases/download/$TAG/$APK_NAME)"
@@ -333,12 +333,12 @@ jobs:
             echo
             echo "Emulator screenshots are attached below (\`emulator-*.png\`). Known issues and the full test report: [docs/TESTING.md]($repo_url/blob/main/docs/TESTING.md)."
           } > notes.md
-          files=("dist/$APK_NAME" "dist/$APK_NAME.sha256" dist/GO-World-News.apk "${shots[@]}")
+          files=("dist/$APK_NAME" "dist/$APK_NAME.sha256" dist/Garowe-World.apk "${shots[@]}")
           if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --notes-file notes.md "${flags[@]}"
             gh release upload "$TAG" --repo "$GITHUB_REPOSITORY" --clobber "${files[@]}"
           else
-            gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --title "GO World News $TAG (Android test build)" --notes-file notes.md --target "$GITHUB_SHA" "${flags[@]}" "${files[@]}"
+            gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --title "Garowe World $TAG (Android test build)" --notes-file notes.md --target "$GITHUB_SHA" "${flags[@]}" "${files[@]}"
           fi
           echo "::notice title=Release published::$repo_url/releases/tag/$TAG"
 
@@ -398,7 +398,7 @@ jobs:
           cd android
           # store build: no server override, R8 on (Expo defaults), all CPU architectures
           ./gradlew bundleRelease --no-daemon -Dorg.gradle.jvmargs="-Xmx6g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8"
-          mkdir -p ../play && cp app/build/outputs/bundle/release/app-release.aab "../play/GO-World-News-${TAG}-play.aab"
+          mkdir -p ../play && cp app/build/outputs/bundle/release/app-release.aab "../play/Garowe-World-${TAG}-play.aab"
           cp app/build/outputs/mapping/release/mapping.txt ../play/ 2>/dev/null || true
       - uses: actions/upload-artifact@v4
         if: env.HAS_UPLOAD_KEY == 'true'

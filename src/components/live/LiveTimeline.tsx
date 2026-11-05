@@ -47,7 +47,7 @@ export function LiveStatusBanner({
       break;
     case 'stale':
       title = fetchedAt ? `Not refreshed since ${formatTime(new Date(fetchedAt).toISOString())}` : 'Live coverage';
-      detail = offline ? 'You’re offline. New updates load when you reconnect.' : 'GO World News couldn’t be reached. Retrying automatically.';
+      detail = offline ? 'You’re offline. New updates load when you reconnect.' : 'Garowe World couldn’t be reached. Retrying automatically.';
       break;
     case 'ended':
       title = 'This live coverage has ended';

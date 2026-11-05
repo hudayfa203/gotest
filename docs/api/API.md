@@ -1,4 +1,4 @@
-# GO World News API v1 — reference
+# Garowe World API v1 — reference
 
 One API serves **goworld.news** and the **iPhone/Android apps**. It is implemented as Next.js route
 handlers in `apps/web/app/api/v1/**` on top of `@goworld/core` (content reads use the published-only

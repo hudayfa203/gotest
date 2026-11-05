@@ -1,4 +1,4 @@
-# GO World News app — development reference
+# Garowe World app — development reference
 
 Native React Native app built with **Expo SDK 58** (React Native 0.88, new architecture, Hermes) and
 **Expo Router**. It is a real native app — screens are rendered with native views, not a WebView of the
@@ -56,7 +56,7 @@ unchanged. The web preview does not register a device, send analytics or count a
 
 ```bash
 EXPO_PUBLIC_API_URL=http://localhost:3100/api/v1 npm run export:web
-npx playwright install chromium && npm run test:visual   # needs a running GO World News API
+npx playwright install chromium && npm run test:visual   # needs a running Garowe World API
 ```
 Reader endpoints (`POST /devices`, `/auth/*`, `/me/*`, `/events`, `/ads/event`) do not send CORS headers, so
 they fail in a browser preview. Native apps do not use CORS — this is a web-preview limitation only.
@@ -98,7 +98,7 @@ they fail in a browser preview. Native apps do not use CORS — this is a web-pr
 Code map: `app/` (routes), `src/api` (client, endpoints, query cache), `src/lib` (pure logic: sync, deep links,
 block helpers, formatting, analytics), `src/components` (UI + article renderer), `src/storage` (SecureStore,
 SQLite, AsyncStorage + web fallbacks), `src/push`, `src/theme.ts` (mirrors the platform's design tokens),
-`src/types.ts` (mirrors the platform's API contracts). Logos and fonts are the approved GO World News brand files.
+`src/types.ts` (mirrors the platform's API contracts). Logos and fonts are the approved Garowe World brand files.
 
 Identifiers (change before the first store submission if needed — they cannot change afterwards):
 **iOS bundle id `news.goworld.app`**, **Android package `news.goworld.app`**, URL scheme `goworldnews`.

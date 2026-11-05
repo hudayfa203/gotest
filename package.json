@@ -1,8 +1,8 @@
 {
   "name": "goworld-news-mobile",
-  "version": "1.2.2",
+  "version": "1.3.0",
   "private": true,
-  "description": "GO World News — Android and iOS app (Expo / React Native). Test APKs are built by GitHub Actions and published under Releases.",
+  "description": "Garowe World — Android and iOS app (Expo / React Native). Test APKs are built by GitHub Actions and published under Releases.",
   "main": "expo-router/entry",
   "scripts": {
     "start": "expo start",

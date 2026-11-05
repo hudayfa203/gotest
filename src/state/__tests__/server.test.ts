@@ -24,8 +24,8 @@ describe('checkServer', () => {
   afterEach(() => {
     globalThis.fetch = realFetch;
   });
-  it('accepts a server whose /config looks like GO World News', async () => {
-    globalThis.fetch = jest.fn(async () => new Response(JSON.stringify({ siteName: 'GO World News', tagline: 'Breaking News. Beyond Borders.' }), { status: 200 })) as typeof fetch;
+  it('accepts a server whose /config looks like Garowe World', async () => {
+    globalThis.fetch = jest.fn(async () => new Response(JSON.stringify({ siteName: 'Garowe World', tagline: 'Breaking News. Beyond Borders.' }), { status: 200 })) as typeof fetch;
     const r = await checkServer('https://s.example.com/api/v1');
     expect(r.ok).toBe(true);
     expect((globalThis.fetch as jest.Mock).mock.calls[0][0]).toBe('https://s.example.com/api/v1/config');

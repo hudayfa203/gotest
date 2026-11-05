@@ -1,4 +1,4 @@
-# Testing report — GO World News Android app
+# Testing report — Garowe World Android app
 
 ## On every GitHub build (automatic)
 
@@ -20,10 +20,10 @@ every job passed:
 | Job | Result |
 |---|---|
 | Typecheck + 95 unit tests | ✅ pass |
-| Release APK build (Gradle, Hermes, new architecture) | ✅ `GO-World-News-v1.0.0.apk`, 91 MB, arm64-v8a + armeabi-v7a + x86_64 |
+| Release APK build (Gradle, Hermes, new architecture) | ✅ `Garowe-World-v1.0.0.apk`, 91 MB, arm64-v8a + armeabi-v7a + x86_64 |
 | APK checks | ✅ package `news.goworld.app`, versionName 1.0.0 / versionCode 2, minSdk 24 (Android 7.0), targetSdk 36, APK Signature Scheme v2 valid |
 | Emulator test, Android 14 (API 34), 1080×2400 | ✅ installed; cold start 3.0 s to first frame (software-rendered emulator); Home, Latest, Live Updates and Settings opened via the app's deep links; process alive after each screen and after Back; **no crash, no JavaScript errors** in logcat |
-| What the screens showed | GO World News logo, tab bar (Home · Latest · Explore · Video · Saved), Settings sections — and on content screens the honest *"server could not be reached"* message, because the API at `https://goworld.news/api/v1` is not online yet ([BACKEND.md](BACKEND.md)) |
+| What the screens showed | Garowe World logo, tab bar (Home · Latest · Explore · Video · Saved), Settings sections — and on content screens the honest *"server could not be reached"* message, because the API at `https://goworld.news/api/v1` is not online yet ([BACKEND.md](BACKEND.md)) |
 | GitHub Release | ✅ APK, stable-name copy, SHA-256 file and four emulator screenshots attached |
 
 ![v1.0.0 on the Android 14 emulator: Home, Latest, Live Updates, Settings](screenshots/emulator-v1.0.0.jpg)
@@ -42,11 +42,11 @@ results and screenshots.
 **v1.0.1** ([release page](https://github.com/hudayfa203/gotest/releases/tag/v1.0.1)) — every job passed again
 (versionCode 3, 91 MB, cold start 3.4 s on the emulator, no crash, no JavaScript errors). It fixes one wording issue
 found in v1.0.0's emulator screenshots: screens that load from the server said *"You're offline"* even when the phone
-was online and only the server was unreachable; they now say *"Couldn't reach GO World News"* in that case.
+was online and only the server was unreachable; they now say *"Couldn't reach Garowe World"* in that case.
 
 ## Verified during development (before this repository)
 
-The same app source was tested inside the full GO World News platform:
+The same app source was tested inside the full Garowe World platform:
 
 | Test | Result |
 |---|---|
@@ -72,7 +72,7 @@ The same app source was tested inside the full GO World News platform:
 
 1. **Demo stories, not real news, until the backend is online.** Test APKs show built-in fictional stories (labelled
    DEMO). With *Settings → Content source → Use the default server* every screen shows the honest "couldn't reach
-   GO World News" state until the backend is deployed. In demo mode, sign-in, notification settings and bookmark sync
+   Garowe World" state until the backend is deployed. In demo mode, sign-in, notification settings and bookmark sync
    say they are not available (they need the server); live coverage does not receive new updates.
 2. **Test signing key.** GitHub APKs are signed with the React Native debug keystore (public, same for every build).
    Fine for side-loading; Play Protect warns about it; never upload such a build to Google Play. Adding the upload key

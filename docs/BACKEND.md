@@ -1,7 +1,7 @@
 # Backend / API / CMS connection
 
-The app shows what the GO World News newsroom publishes. It has no content of its own: everything comes from the
-GO World News API (`/api/v1`), which is part of the GO World News platform (website + newsroom dashboard/CMS +
+The app shows what the Garowe World newsroom publishes. It has no content of its own: everything comes from the
+Garowe World API (`/api/v1`), which is part of the Garowe World platform (website + newsroom dashboard/CMS +
 API + background worker on PostgreSQL). Editors publish in the dashboard; the app reads the published result through
 the API within seconds.
 
@@ -15,7 +15,7 @@ the API within seconds.
 | Piece | State |
 |---|---|
 | App ↔ API code | Complete. Every screen uses the real endpoints in [api/openapi.yaml](api/openapi.yaml); no mock data is bundled in the app. |
-| API / CMS source | Complete and tested in the platform repository (delivered separately as the GO World News platform source; it is not in this app repository). |
+| API / CMS source | Complete and tested in the platform repository (delivered separately as the Garowe World platform source; it is not in this app repository). |
 | **Deployed backend** | **None yet.** The platform has not been deployed to any server, and `goworld.news` is not connected to it. |
 | Address built into the APK | `https://goworld.news/api/v1` (repository variable `GW_API_URL` overrides it). |
 | Built-in demo stories | Test APKs open with fictional, DEMO-labelled sample content exported from the platform's demo seed (`src/demo`), so the app can be tried today. Store builds never contain it. |

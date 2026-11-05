@@ -1,6 +1,6 @@
 openapi: 3.1.0
 info:
-  title: GO World News — Public Content & Reader API
+  title: Garowe World — Public Content & Reader API
   version: 1.1.0
   summary: One API for goworld.news, the iPhone app and the Android app.
   description: 'Implemented by `apps/web/app/api/v1/**` on top of `packages/core`. Content endpoints read only the published-only `public_api`
@@ -8,7 +8,7 @@ info:
     (Zod). The newsroom (create/edit/approve/publish) is not part of this API — it runs in the dashboard at admin.goworld.news. Human-readable
     guide: docs/API.md.'
   contact:
-    name: GO World News Engineering
+    name: Garowe World Engineering
     url: https://goworld.news
   license:
     name: Proprietary

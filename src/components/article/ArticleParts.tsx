@@ -18,12 +18,12 @@ export function DemoNotice() {
   return (
     <View
       accessibilityRole="text"
-      accessibilityLabel="Demo content. This story is demonstration material for the GO World News platform and does not describe real events."
+      accessibilityLabel="Demo content. This story is demonstration material for the Garowe World platform and does not describe real events."
       style={{ flexDirection: 'row', gap: 10, alignItems: 'flex-start', borderRadius: 10, padding: 12, backgroundColor: isDark ? 'rgba(242,193,78,0.12)' : '#FFF6DF', borderWidth: 1, borderColor: isDark ? '#F2C14E' : '#E3C27A' }}
     >
       <DemoBadge />
       <Txt variant="ui" size={13} lineHeight={18} color={isDark ? '#F6DCA0' : '#5C3D00'} style={{ flex: 1 }}>
-        Demonstration content for the GO World News platform. It does not describe real events.
+        Demonstration content for the Garowe World platform. It does not describe real events.
       </Txt>
     </View>
   );
@@ -225,7 +225,7 @@ export function TombstoneView({ tombstone, message }: { tombstone: Tombstone | n
         This article has been withdrawn
       </Txt>
       <Txt variant="serif" size={17} lineHeight={26}>
-        {tombstone?.notice || message || 'GO World News has withdrawn this article.'}
+        {tombstone?.notice || message || 'Garowe World has withdrawn this article.'}
       </Txt>
       {tombstone?.withdrawnAt ? (
         <Txt variant="ui" size={13} muted>

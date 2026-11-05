@@ -8,7 +8,7 @@ Every push to `main` builds and emulator-tests an APK (download it from the run'
    The first build of a version that has no release yet publishes **release v1.0.1** automatically.
    (Pushing a git tag `v1.0.1` does the same.)
 2. GitHub Actions → **Android APK** builds it, installs it on an Android 14 emulator and attaches
-   `GO-World-News-v1.0.1.apk`, `GO-World-News.apk` (stable name for the "latest" link), the checksum and emulator
+   `Garowe-World-v1.0.1.apk`, `Garowe-World.apk` (stable name for the "latest" link), the checksum and emulator
    screenshots to the release. If the emulator test fails, the release is still published but marked
    **pre-release** with the report at the top, so the "latest" download link keeps pointing at the last good build.
 
@@ -33,13 +33,13 @@ every tag once the key is stored as repository secrets; until then that job is s
 1. Create the upload key once and keep two backups somewhere safe (losing it means asking Google for a key reset):
    ```bash
    keytool -genkeypair -v -keystore goworld-upload.jks -alias goworld-upload \
-     -keyalg RSA -keysize 4096 -validity 10000 -dname "CN=GO World News, O=GO World News"
+     -keyalg RSA -keysize 4096 -validity 10000 -dname "CN=Garowe World, O=Garowe World"
    base64 -w0 goworld-upload.jks > goworld-upload.jks.b64      # macOS: base64 -i goworld-upload.jks
    ```
 2. Repository → *Settings → Secrets and variables → Actions → New repository secret*:
    `ANDROID_UPLOAD_KEYSTORE_BASE64` (content of the `.b64` file), `ANDROID_UPLOAD_STORE_PASSWORD`,
    `ANDROID_UPLOAD_KEY_ALIAS` (`goworld-upload`), `ANDROID_UPLOAD_KEY_PASSWORD`.
-3. Push a tag. The **play-bundle** artifact of that run contains `GO-World-News-vX.Y.Z-play.aab` (built without the
+3. Push a tag. The **play-bundle** artifact of that run contains `Garowe-World-vX.Y.Z-play.aab` (built without the
    test-only server setting, with R8 code shrinking, all CPU types) and `mapping.txt` for crash de-obfuscation.
 4. Google Play Console: create the app (`news.goworld.app`), enrol in **Play App Signing**, upload the .aab to the
    **Internal testing** track first, complete the store listing, Data safety form and content rating

@@ -313,7 +313,7 @@ function ArticleScreen() {
     return (
       <View style={{ flex: 1, backgroundColor: c.bg, paddingTop: topPad }}>
         {topBar}
-        <ErrorState error={null} title="This link isn’t a GO World News article" />
+        <ErrorState error={null} title="This link isn’t a Garowe World article" />
       </View>
     );
   }
@@ -330,7 +330,7 @@ function ArticleScreen() {
     return (
       <View style={{ flex: 1, backgroundColor: c.bg, paddingTop: topPad }}>
         {topBar}
-        {loading && !q.isError ? <ArticleSkeleton /> : <ErrorState error={q.error} onRetry={() => void q.refetch()} title={isNetworkError(q.error) ? (offline ? 'You’re offline' : 'Couldn’t reach GO World News') : 'Couldn’t load this story'} />}
+        {loading && !q.isError ? <ArticleSkeleton /> : <ErrorState error={q.error} onRetry={() => void q.refetch()} title={isNetworkError(q.error) ? (offline ? 'You’re offline' : 'Couldn’t reach Garowe World') : 'Couldn’t load this story'} />}
       </View>
     );
   }
@@ -378,8 +378,8 @@ function ArticleScreen() {
               <Icon name="offline" size={16} color={c.textMuted} />
               <Txt variant="ui" size={12.5} muted style={{ flex: 1 }}>
                 {saved.item
-                  ? `${offline ? 'You’re offline.' : q.isError ? 'GO World News couldn’t be reached.' : 'Loading the latest version…'} Reading the copy saved on this device (${formatDate(saved.item.savedAt)}). It updates automatically when the connection is back.`
-                  : `${offline ? 'You’re offline.' : q.isError ? 'GO World News couldn’t be reached.' : 'Loading the latest version…'} Showing the version downloaded ${timeAgo(new Date(q.dataUpdatedAt || Date.now()).toISOString()).toLowerCase()}.`}
+                  ? `${offline ? 'You’re offline.' : q.isError ? 'Garowe World couldn’t be reached.' : 'Loading the latest version…'} Reading the copy saved on this device (${formatDate(saved.item.savedAt)}). It updates automatically when the connection is back.`
+                  : `${offline ? 'You’re offline.' : q.isError ? 'Garowe World couldn’t be reached.' : 'Loading the latest version…'} Showing the version downloaded ${timeAgo(new Date(q.dataUpdatedAt || Date.now()).toISOString()).toLowerCase()}.`}
               </Txt>
             </View>
           ) : null}

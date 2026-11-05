@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Emulator smoke test for the GO World News APK, run by .github/workflows/android-apk.yml.
+# Emulator smoke test for the Garowe World APK, run by .github/workflows/android-apk.yml.
 #
 #   android-smoke-test.sh <apk> <output-dir>
 #

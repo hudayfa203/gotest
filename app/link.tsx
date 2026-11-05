@@ -41,7 +41,7 @@ export default function LinkResolver() {
         leave();
         await openExternal(`${getSiteUrl()}${String(path)}`);
       } catch (e) {
-        if (isNotFound(e) || isGone(e)) setError('This page could not be found on GO World News.');
+        if (isNotFound(e) || isGone(e)) setError('This page could not be found on Garowe World.');
         else {
           leave();
           await openExternal(`${getSiteUrl()}${String(path)}`);

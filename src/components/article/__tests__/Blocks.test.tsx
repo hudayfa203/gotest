@@ -44,6 +44,17 @@ describe('<Blocks> native renderer', () => {
     expect(screen.getByText('Demo table')).toBeTruthy();
   });
 
+  it('renders a photo gallery with every photo, a counter and the per-photo caption', async () => {
+    const img = (n: number) => ({ id: `g${n}`, url: `https://media.example/g${n}.jpg`, width: 1200, height: 800, alt: `Gallery photo ${n}`, caption: `Caption ${n}`, credit: 'Staff', variants: [] });
+    await wrap(<Blocks blocks={[{ type: 'gallery', caption: 'In pictures: the harbour', images: [img(1), img(2), img(3)] }]} ctx={ctx} />);
+    expect(screen.getByTestId('gallery')).toBeTruthy();
+    expect(screen.getByLabelText(/Photo 1 of 3: Gallery photo 1/)).toBeTruthy();
+    expect(screen.getByLabelText(/Photo 3 of 3: Gallery photo 3/)).toBeTruthy();
+    expect(screen.getByText(/1 \/ 3/)).toBeTruthy();
+    expect(screen.getByText(/Caption 1/)).toBeTruthy();
+    expect(screen.getByText('In pictures: the harbour')).toBeTruthy();
+  });
+
   it('makes links tappable and hands them to the link router', async () => {
     const link = { type: 'link' as const, href: 'https://goworld.news/africa/port-upgrade-ydxp3tgefb', text: 'port story' };
     await wrap(<Blocks blocks={[{ type: 'paragraph', children: [{ type: 'text', text: 'Read the ' }, link] }]} ctx={ctx} />);

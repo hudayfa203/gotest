@@ -1,5 +1,5 @@
 /**
- * Test builds only: which GO World News server the app talks to (Settings → Server).
+ * Test builds only: which Garowe World server the app talks to (Settings → Server).
  *
  * The test APK published on GitHub is built with ALLOW_SERVER_OVERRIDE so a tester can point an installed app at a
  * staging or self-hosted backend without waiting for a new build. Store builds ignore all of this.
@@ -53,17 +53,17 @@ export function normalizeApiUrl(input: string): { ok: true; url: string } | { ok
   return { ok: true, url: `${u.protocol}//${u.host}${path}` };
 }
 
-/** GET {api}/config — every GO World News server answers it without credentials. */
+/** GET {api}/config — every Garowe World server answers it without credentials. */
 export async function checkServer(apiUrl: string, timeoutMs = 10_000): Promise<ServerCheck> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   const started = Date.now();
   try {
     const res = await fetch(`${apiUrl}/config`, { headers: { Accept: 'application/json' }, signal: controller.signal });
-    if (!res.ok) return { ok: false, message: `The server answered HTTP ${res.status}. Is this a GO World News API address?` };
+    if (!res.ok) return { ok: false, message: `The server answered HTTP ${res.status}. Is this a Garowe World API address?` };
     const body = (await res.json().catch(() => null)) as { siteName?: unknown; tagline?: unknown } | null;
     if (!body || typeof body !== 'object' || !('tagline' in body || 'siteName' in body)) {
-      return { ok: false, message: 'The server answered, but not like a GO World News API.' };
+      return { ok: false, message: 'The server answered, but not like a Garowe World API.' };
     }
     return { ok: true, name: typeof body.siteName === 'string' ? body.siteName : undefined, ms: Date.now() - started };
   } catch {

@@ -1,7 +1,7 @@
 import type { ExpoConfig, ConfigContext } from 'expo/config';
 
 /**
- * GO World News — native app configuration.
+ * Garowe World — native app configuration.
  *
  * Identifiers below (bundle id / package) are the proposed defaults and can be changed before the
  * first store submission. After an app is published, they can never change for that store listing.
@@ -25,7 +25,7 @@ const NAVY = '#0B2A5E';
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
-  name: 'GO World News',
+  name: 'Garowe World',
   slug: 'goworld-news',
   version: VERSION_NAME,
   orientation: 'portrait',
@@ -34,7 +34,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   icon: './assets/images/icon.png',
   backgroundColor: DEEP_NAVY,
   primaryColor: NAVY,
-  description: 'Breaking News. Beyond Borders. International news from GO World News.',
+  description: 'Breaking News. Beyond Borders. International news from Garowe World.',
   ios: {
     bundleIdentifier: 'news.goworld.app',
     buildNumber: String(VERSION_CODE),
@@ -87,7 +87,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     favicon: './assets/images/favicon.png',
     bundler: 'metro',
     output: 'single',
-    name: 'GO World News (app preview)',
+    name: 'Garowe World (app preview)',
     themeColor: NAVY,
     backgroundColor: DEEP_NAVY,
   },

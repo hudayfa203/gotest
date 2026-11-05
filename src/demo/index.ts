@@ -1,7 +1,7 @@
 /**
  * BUILT-IN DEMO CONTENT (test builds only).
  *
- * Until a GO World News server is online, test APKs can show a fixed set of clearly labelled demonstration stories
+ * Until a Garowe World server is online, test APKs can show a fixed set of clearly labelled demonstration stories
  * (every item carries isDemo → "Demo" badges, plus the demo notice on Home). The stories, live coverage, alerts and
  * media were exported from the platform's demo seed by scripts/export-app-demo.mjs and are answered here as if they
  * came from the API, so every screen runs its normal code path.
@@ -55,7 +55,7 @@ export function prepareDemoMedia(): Promise<void> {
 }
 
 export const DEMO_UNAVAILABLE_MESSAGE =
-  'Not available with the built-in demo stories. Connect the app to a GO World News server in Settings → Content source.';
+  'Not available with the built-in demo stories. Connect the app to a Garowe World server in Settings → Content source.';
 
 type Out = { status: number; body?: Json };
 const ok = (body: Json): Out => ({ status: 200, body });

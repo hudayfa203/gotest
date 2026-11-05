@@ -89,7 +89,7 @@ export default function MenuScreen() {
       >
         <View style={{ paddingTop: insets.top, backgroundColor: '#061A40' }}>
           <View style={{ height: 60, flexDirection: 'row', alignItems: 'center', paddingLeft: 18, paddingRight: 6 }}>
-            <Image source={require('../assets/images/logo-oneline-reversed.png')} style={{ width: 168, height: 26 }} contentFit="contain" accessibilityLabel="GO World News" />
+            <Image source={require('../assets/images/logo-oneline-reversed.png')} style={{ width: 168, height: 26 }} contentFit="contain" accessibilityLabel="Garowe World" />
             <View style={{ flex: 1 }} />
             <Tap onPress={() => close()} accessibilityLabel="Close menu" style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}>
               <Icon name="close" size={24} color="#FFFFFF" />
@@ -198,19 +198,19 @@ export default function MenuScreen() {
               label="Share the app"
               onPress={() => {
                 const links = [config.data?.storeUrls?.android ? `Android: ${config.data.storeUrls.android}` : null, config.data?.storeUrls?.ios ? `iPhone: ${config.data.storeUrls.ios}` : null].filter(Boolean).join('\n');
-                void Share.share({ message: `GO World News — ${config.data?.tagline ?? 'Breaking News. Beyond Borders.'}\n${links}` }).catch(() => {});
+                void Share.share({ message: `Garowe World — ${config.data?.tagline ?? 'Breaking News. Beyond Borders.'}\n${links}` }).catch(() => {});
               }}
             />
           ) : null}
 
-          <Heading title="GO World News" />
+          <Heading title="Garowe World" />
           <MenuRow label="About us" onPress={() => go('/settings/page/about')} />
           <MenuRow label="Editorial standards" onPress={() => go('/settings/page/editorialStandards')} />
           <MenuRow label="Corrections" onPress={() => close(() => void openExternal(`${getSiteUrl()}/corrections`))} />
           <MenuRow label="Privacy policy" onPress={() => go('/settings/page/privacy')} />
           <MenuRow label="Terms of use" onPress={() => go('/settings/page/terms')} />
           {config.data?.tipsEmail ? <MenuRow label="Send us a news tip" onPress={() => void Linking.openURL(`mailto:${config.data!.tipsEmail}?subject=${encodeURIComponent('News tip')}`)} /> : null}
-          {config.data?.contactEmail ? <MenuRow label="Advertise with us" onPress={() => void Linking.openURL(`mailto:${config.data!.contactEmail}?subject=${encodeURIComponent('Advertising on GO World News')}`)} /> : null}
+          {config.data?.contactEmail ? <MenuRow label="Advertise with us" onPress={() => void Linking.openURL(`mailto:${config.data!.contactEmail}?subject=${encodeURIComponent('Advertising on Garowe World')}`)} /> : null}
 
           <View style={{ paddingHorizontal: 18, paddingTop: 22, gap: 6 }}>
             {demo ? (

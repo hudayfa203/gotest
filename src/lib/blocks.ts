@@ -52,6 +52,10 @@ export function blocksToPlainText(blocks: Block[]): string {
       case 'image':
         if (b.image.caption) out.push(b.image.caption);
         break;
+      case 'gallery':
+        if (b.caption) out.push(b.caption);
+        b.images.forEach((i) => { if (i.caption) out.push(i.caption); });
+        break;
       case 'table':
         if (b.caption) out.push(b.caption);
         out.push(b.header.join(' | '));

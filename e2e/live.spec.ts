@@ -160,7 +160,7 @@ test.describe('live — simulated API states (test only)', () => {
             id: 'sim-new-1', articleId: LIVE, at: body.serverTime, pinned: false, headline: 'Delegates tour the new rail depot (simulated in the visual test)',
             body: [
               { type: 'paragraph', children: [{ type: 'text', text: 'This update was injected by the visual test to show how a new update with a photo and a link arrives. ' }, { type: 'link', href: 'https://goworld.news/africa/new-direct-flights-to-link-three-east-african-capitals-a3p8pdt61j', text: 'Related: new direct flights' }] },
-              { type: 'image', image: { ...full.coverage.image, caption: 'Illustration (demo image)', credit: 'GO World News' } },
+              { type: 'image', image: { ...full.coverage.image, caption: 'Illustration (demo image)', credit: 'Garowe World' } },
             ],
             author: { name: 'Maria Santos', slug: 'maria-santos-demo' },
           },

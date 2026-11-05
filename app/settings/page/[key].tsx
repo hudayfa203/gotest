@@ -9,7 +9,7 @@ import { useTheme } from '../../../src/state/theme';
 import type { AppConfig } from '../../../src/types';
 
 const TITLES: Record<keyof AppConfig['pages'], string> = {
-  about: 'About GO World News',
+  about: 'About Garowe World',
   editorialStandards: 'Editorial standards',
   privacy: 'Privacy policy',
   terms: 'Terms of use',

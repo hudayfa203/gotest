@@ -1,7 +1,7 @@
 import { useQueries } from '@tanstack/react-query';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { FlatList, ScrollView, Text, View } from 'react-native';
 import { endpoints } from '../../api';
 import { embedLabel, headingSize, hostOf, listMarker, tableColumnWidths, videoSource } from '../../lib/blocks';
 import { openExternal } from '../../lib/navigation';
@@ -94,6 +94,8 @@ export function BlockView({ block: b, ctx }: { block: Block; ctx: BlockContext }
       );
     case 'image':
       return <ImageBlock image={b.image} width={ctx.width} />;
+    case 'gallery':
+      return b.images.length ? <GalleryBlock images={b.images} caption={b.caption} width={ctx.width} /> : null;
     case 'video': {
       if (ctx.skipVideoUrl && b.url === ctx.skipVideoUrl) return null;
       const src = videoSource(b);
@@ -200,6 +202,40 @@ function ImageBlock({ image, width }: { image: ImageRef; width: number }) {
         </Text>
       ) : null}
       {open ? <Lightbox image={image} visible={open} onClose={() => setOpen(false)} /> : null}
+    </View>
+  );
+}
+
+/** Swipeable photo gallery: one photo per page, "2 / 8" counter, tap a photo for the full-screen viewer. */
+function GalleryBlock({ images, caption, width }: { images: ImageRef[]; caption?: string; width: number }) {
+  const { c } = useTheme();
+  const [index, setIndex] = useState(0);
+  const [open, setOpen] = useState<number | null>(null);
+  const current = images[index];
+  return (
+    <View style={{ gap: 8 }} accessibilityLabel={caption ? `Gallery: ${caption}. ${images.length} photos` : `Photo gallery, ${images.length} photos`} testID="gallery">
+      <FlatList
+        data={images}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        keyExtractor={(img, i) => `${img.id}-${i}`}
+        getItemLayout={(_, i) => ({ length: width, offset: width * i, index: i })}
+        onMomentumScrollEnd={(e) => setIndex(Math.max(0, Math.min(images.length - 1, Math.round(e.nativeEvent.contentOffset.x / Math.max(1, width)))))}
+        style={{ width, borderRadius: 6, overflow: 'hidden', backgroundColor: '#0B1324' }}
+        renderItem={({ item, index: i }) => (
+          <Tap onPress={() => setOpen(i)} pressScale={0.99} accessibilityRole="imagebutton" accessibilityLabel={`Photo ${i + 1} of ${images.length}: ${item.alt}. Double-tap to view full screen.`}>
+            <ArticleImage image={item} width={width} ratio={3 / 2} accessible={false} />
+          </Tap>
+        )}
+      />
+      <Text style={{ fontFamily: fonts.ui400, fontSize: 13, lineHeight: 18, color: c.textMuted }} allowFontScaling maxFontSizeMultiplier={1.8}>
+        <Text style={{ fontFamily: fonts.ui700, color: c.heading }}>{index + 1} / {images.length}</Text>
+        {current?.caption ? `  ${current.caption}` : ''}
+        {current?.credit ? <Text style={{ fontFamily: fonts.ui500 }}>{'  '}{current.credit}</Text> : null}
+      </Text>
+      {caption ? <Txt variant="uiBold" size={14} color={c.heading}>{caption}</Txt> : null}
+      {open !== null && images[open] ? <Lightbox image={images[open]!} visible onClose={() => setOpen(null)} /> : null}
     </View>
   );
 }

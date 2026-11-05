@@ -25,7 +25,7 @@ export function configureNotificationHandling() {
   if (Platform.OS === 'android') {
     void Notifications.setNotificationChannelAsync(BREAKING_CHANNEL_ID, {
       name: 'Breaking news',
-      description: 'Major breaking stories from GO World News',
+      description: 'Major breaking stories from Garowe World',
       importance: Notifications.AndroidImportance.HIGH,
       vibrationPattern: [0, 200, 120, 200],
       lightColor: '#E1141E',
