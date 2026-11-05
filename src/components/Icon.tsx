@@ -5,7 +5,7 @@ export type IconName =
   | 'home' | 'latest' | 'explore' | 'video' | 'saved' | 'saved-filled' | 'share' | 'text-size' | 'browser'
   | 'back' | 'chevron-right' | 'close' | 'settings' | 'play' | 'pause' | 'headphones' | 'refresh' | 'offline'
   | 'check' | 'trash' | 'mail' | 'bell' | 'search' | 'user' | 'info' | 'alert' | 'arrow-up' | 'sliders' | 'clock' | 'external'
-  | 'pin' | 'archive' | 'pencil' | 'broadcast';
+  | 'pin' | 'archive' | 'pencil' | 'broadcast' | 'menu' | 'sun' | 'moon' | 'globe' | 'mic' | 'grid' | 'chevron-down' | 'send' | 'chat';
 
 export function Icon({ name, size = 24, color = '#000', strokeWidth = 2, filled = false }: { name: IconName; size?: number; color?: string; strokeWidth?: number; filled?: boolean }) {
   const p = { stroke: color, strokeWidth, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, fill: 'none' };
@@ -213,6 +213,52 @@ export function Icon({ name, size = 24, color = '#000', strokeWidth = 2, filled 
                 <Path {...p} d="M5.3 18.7a9.5 9.5 0 0 1 0-13.4M18.7 5.3a9.5 9.5 0 0 1 0 13.4" />
               </>
             );
+          case 'menu':
+            return (
+              <>
+                <Line {...p} x1={3.5} y1={6.5} x2={20.5} y2={6.5} />
+                <Line {...p} x1={3.5} y1={12} x2={15.5} y2={12} />
+                <Line {...p} x1={3.5} y1={17.5} x2={20.5} y2={17.5} />
+              </>
+            );
+          case 'sun':
+            return (
+              <>
+                <Circle {...p} cx={12} cy={12} r={4} fill={f} />
+                <Path {...p} d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4" />
+              </>
+            );
+          case 'moon':
+            return <Path {...p} fill={f} d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7z" />;
+          case 'globe':
+            return (
+              <>
+                <Circle {...p} cx={12} cy={12} r={9} />
+                <Path {...p} d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" />
+              </>
+            );
+          case 'mic':
+            return (
+              <>
+                <Rect {...p} x={9} y={3} width={6} height={11} rx={3} fill={f} />
+                <Path {...p} d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21" />
+              </>
+            );
+          case 'grid':
+            return (
+              <>
+                <Rect {...p} x={3.5} y={3.5} width={7} height={7} rx={1.5} />
+                <Rect {...p} x={13.5} y={3.5} width={7} height={7} rx={1.5} />
+                <Rect {...p} x={3.5} y={13.5} width={7} height={7} rx={1.5} />
+                <Rect {...p} x={13.5} y={13.5} width={7} height={7} rx={1.5} />
+              </>
+            );
+          case 'chevron-down':
+            return <Polyline {...p} points="5 9 12 16 19 9" />;
+          case 'send':
+            return <Path {...p} d="M21 3 3 10.5l7 2.5 2.5 7zM10 13l11-10" />;
+          case 'chat':
+            return <Path {...p} d="M4 18.5V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H8z" />;
           case 'sliders':
             return (
               <>

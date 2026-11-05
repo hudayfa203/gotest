@@ -1,6 +1,7 @@
 import { View, type ViewStyle } from 'react-native';
 import { displayLabels, type DisplayLabel } from '../lib/live';
 import { useTheme } from '../state/theme';
+import { fonts } from '../theme';
 import type { Label, LiveState } from '../types';
 import { LivePulse } from './LivePulse';
 import { Txt } from './Txt';
@@ -28,9 +29,9 @@ export function LabelChip({ label, style }: { label: DisplayLabel; style?: ViewS
   const fg = label === 'exclusive' && isDark ? '#061A40' : label === 'developing' && isDark ? '#1A1000' : label === 'ended' && isDark ? '#E8EEF8' : '#FFFFFF';
   return (
     <View style={[{ flexDirection: 'row', alignSelf: 'flex-start' }, style]} accessibilityRole="text" accessibilityLabel={label === 'ended' ? 'Live coverage ended' : label === 'live' ? 'Live now' : NAMES[label]}>
-      <View style={{ backgroundColor: bg, paddingHorizontal: 8, paddingVertical: 3, transform: [{ skewX: '-12deg' }], borderRadius: 2, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+      <View style={{ backgroundColor: bg, paddingHorizontal: 8, paddingVertical: 2, transform: [{ skewX: '-12deg' }], borderRadius: 2, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
         {label === 'live' ? <LivePulse color="#FFFFFF" size={6} /> : null}
-        <Txt variant="kicker" size={10.5} color={fg} style={{ transform: [{ skewX: '12deg' }] }}>
+        <Txt variant="kicker" size={11.5} color={fg} style={{ transform: [{ skewX: '12deg' }], fontFamily: fonts.display800Italic, letterSpacing: 0 }}>
           {NAMES[label]}
         </Txt>
       </View>
@@ -67,9 +68,9 @@ export function DemoBadge({ style, onDark }: { style?: ViewStyle; onDark?: boole
     <View
       accessibilityRole="text"
       accessibilityLabel="Demo content"
-      style={[{ alignSelf: 'flex-start', borderWidth: 1, borderColor: dark ? '#F2C14E' : '#8A5A00', backgroundColor: dark ? 'rgba(242,193,78,0.14)' : '#FFF6DF', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 }, style]}
+      style={[{ alignSelf: 'flex-start', borderWidth: 1, borderColor: dark ? '#F2C14E' : '#D9A520', backgroundColor: dark ? 'rgba(242,193,78,0.16)' : '#FFF1C2', paddingHorizontal: 6, paddingVertical: 1, borderRadius: 4 }, style]}
     >
-      <Txt variant="kicker" size={9.5} color={dark ? '#F2C14E' : '#8A5A00'}>
+      <Txt variant="kicker" size={11} color={dark ? '#F2C14E' : '#5C3D00'}>
         Demo
       </Txt>
     </View>

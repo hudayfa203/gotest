@@ -36,15 +36,22 @@ export function Kicker({ a, color }: { a: ArticleSummary; color?: string }) {
   );
 }
 
-export function Meta({ a, color, showReading = false }: { a: ArticleSummary; color?: string; showReading?: boolean }) {
+export function Meta({ a, color, showReading = false, hideDemo = false }: { a: ArticleSummary; color?: string; showReading?: boolean; hideDemo?: boolean }) {
   const { c } = useTheme();
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
       <Txt variant="ui" size={12} color={color ?? c.textMuted}>
         {timeAgo(a.publishedAt)}
-        {showReading ? ` · ${a.readingTimeMinutes} min read` : ''}
+        {showReading && a.readingTimeMinutes ? (
+          <>
+            <Txt variant="uiBold" size={12} color="#E1141E">
+              {'  /  '}
+            </Txt>
+            {`${a.readingTimeMinutes} min read`}
+          </>
+        ) : null}
       </Txt>
-      {a.isDemo ? <DemoBadge onDark={color ? true : undefined} /> : null}
+      {a.isDemo && !hideDemo ? <DemoBadge onDark={color ? true : undefined} /> : null}
     </View>
   );
 }
@@ -67,15 +74,27 @@ export function LeadCard({ a }: { a: ArticleSummary }) {
           <Txt variant="display" size={29} lineHeight={34} color="#FFFFFF" numberOfLines={4}>
             {a.headline}
           </Txt>
-          <Txt variant="ui" size={12.5} color="rgba(255,255,255,0.82)">
-            {a.category.name} · {timeAgo(a.publishedAt)}
+          <Txt variant="uiStrong" size={13} color="#8CC8FF">
+            {a.category.name}
+            <Txt variant="ui" size={13} color="rgba(255,255,255,0.82)">
+              {'  ·  '}
+              {timeAgo(a.publishedAt)}
+            </Txt>
           </Txt>
         </View>
       </View>
       {a.standfirst ? (
-        <Txt variant="serif" size={16.5} lineHeight={25} color={c.text} style={{ paddingHorizontal: 16, paddingTop: 14 }} numberOfLines={3}>
+        <Txt variant="serif" size={17} lineHeight={26} color={c.text} style={{ paddingHorizontal: 16, paddingTop: 14 }} numberOfLines={3}>
           {a.standfirst}
         </Txt>
+      ) : null}
+      {a.authors[0] ? (
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingTop: 10 }}>
+          <Txt variant="uiBold" size={13} color={c.heading}>
+            By {a.authors[0].name}
+          </Txt>
+          <Meta a={a} showReading hideDemo />
+        </View>
       ) : null}
     </Tap>
   );
@@ -162,6 +181,42 @@ export function LatestRow({ a, last }: { a: ArticleSummary; last?: boolean }) {
           {a.headline}
         </Txt>
         <StatusLabels a={a} style={{ marginTop: 2 }} />
+      </View>
+    </Tap>
+  );
+}
+
+function clock(iso: string, now = Date.now()) {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  if (now - d.getTime() > 20 * 3600 * 1000) return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
+}
+
+/** Home "Latest" timeline (the website's design): clock time, red dot on a rail, category + labels, headline. */
+export function TimelineRow({ a, last }: { a: ArticleSummary; last?: boolean }) {
+  const { c } = useTheme();
+  const isLive = liveBadge(a) === 'live';
+  return (
+    <Tap onPress={() => openArticle(a.id)} accessibilityLabel={a11yLabel(a)} accessibilityRole="link" pressScale={0.985} style={{ flexDirection: 'row', minHeight: 70 }}>
+      <Txt variant="title" size={14} color={c.heading} style={{ width: 54, paddingTop: 1 }} maxFontSizeMultiplier={1.2}>
+        {clock(a.publishedAt)}
+      </Txt>
+      <View style={{ width: 18, alignItems: 'center' }}>
+        <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: isLive || a.labels.includes('breaking') ? c.breaking : '#E1141E', marginTop: 6 }} />
+        {!last ? <View style={{ flex: 1, width: 1.5, backgroundColor: c.border, marginTop: 4 }} /> : null}
+      </View>
+      <View style={{ flex: 1, gap: 5, paddingBottom: 18, paddingLeft: 6 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          <Txt variant="kicker" size={12.5} color={c.link}>
+            {a.category.name}
+          </Txt>
+          <StatusLabels a={a} max={1} />
+          {a.isDemo ? <DemoBadge /> : null}
+        </View>
+        <Txt variant="headline" size={16} lineHeight={21} numberOfLines={3}>
+          {a.headline}
+        </Txt>
       </View>
     </Tap>
   );

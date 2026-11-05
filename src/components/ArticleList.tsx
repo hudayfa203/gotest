@@ -3,6 +3,7 @@ import { ActivityIndicator, FlatList, RefreshControl, View } from 'react-native'
 import { haptic } from '../lib/haptics';
 import { useTheme } from '../state/theme';
 import type { ArticleSummary } from '../types';
+import { AdCard } from './AdCard';
 import { MAX_FEED_WIDTH, StoryCard, StoryRow } from './cards';
 import { FeedSkeleton } from './Skeleton';
 import { EmptyState, ErrorState } from './StateViews';
@@ -10,7 +11,7 @@ import { Txt } from './Txt';
 
 /** Paginated story list used by Latest, sections, authors, topics and search results. */
 export function ArticleList({
-  items, isPending, isError, error, refetch, fetchNextPage, hasNextPage, isFetchingNextPage, header, emptyTitle = 'No stories yet', emptyBody, featureFirst = false, contentTopInset = 0,
+  items, isPending, isError, error, refetch, fetchNextPage, hasNextPage, isFetchingNextPage, header, emptyTitle = 'No stories yet', emptyBody, featureFirst = false, contentTopInset = 0, ads = true,
 }: {
   items: ArticleSummary[];
   isPending: boolean;
@@ -25,6 +26,8 @@ export function ArticleList({
   emptyBody?: string;
   featureFirst?: boolean;
   contentTopInset?: number;
+  /** app_list_inline ad after the 5th and 15th story */
+  ads?: boolean;
 }) {
   const { c } = useTheme();
   const [refreshing, setRefreshing] = useState(false);
@@ -57,6 +60,11 @@ export function ArticleList({
         ) : (
           <View style={{ paddingHorizontal: 16 }}>
             <StoryRow a={item} divider={index < items.length - 1} />
+            {ads && (index === 4 || index === 14) && index < items.length - 1 ? (
+              <View style={{ paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: c.border }}>
+                <AdCard placement="app_list_inline" />
+              </View>
+            ) : null}
           </View>
         )
       }

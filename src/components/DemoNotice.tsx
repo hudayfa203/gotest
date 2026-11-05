@@ -42,7 +42,7 @@ export function DemoNotice() {
           Demo
         </Txt>
         <Txt variant="ui" size={12.5} lineHeight={17} color={fg} style={{ flex: 1 }}>
-          Fictional sample stories built into this test app — not real news. Tap to change the content source.
+          Demo stories built into this test app — not real news.
         </Txt>
         <Icon name="chevron-right" size={16} color={fg} />
       </View>

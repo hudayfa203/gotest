@@ -6,7 +6,7 @@ export type TxtVariant =
   | 'display' // Montserrat 900 — lead headlines
   | 'headline' // Montserrat 800 — article/card headlines
   | 'title' // Montserrat 700 — section titles, screen titles
-  | 'kicker' // Montserrat 800 uppercase — labels, section kickers
+  | 'kicker' // Inter 600 — category names, small labels (sentence case, as on goworld.news)
   | 'ui' // Inter 500 — interface text
   | 'uiStrong' // Inter 600
   | 'uiBold' // Inter 700
@@ -19,7 +19,7 @@ const FAMILY: Record<TxtVariant, string> = {
   display: fonts.display900,
   headline: fonts.display800,
   title: fonts.display700,
-  kicker: fonts.display800,
+  kicker: fonts.ui600,
   ui: fonts.ui500,
   uiStrong: fonts.ui600,
   uiBold: fonts.ui700,
@@ -62,8 +62,8 @@ export function Txt({ variant = 'body', size, color, muted, align, lineHeight, u
           lineHeight: lh,
           color: color ?? (muted ? c.textMuted : isHeading ? c.heading : c.text),
           textAlign: align,
-          letterSpacing: variant === 'kicker' ? 0.9 : isHeading ? -0.2 : 0,
-          textTransform: uppercase || variant === 'kicker' ? 'uppercase' : undefined,
+          letterSpacing: variant === 'kicker' ? 0.1 : isHeading ? -0.2 : 0,
+          textTransform: uppercase ? 'uppercase' : undefined,
         },
         style,
       ]}

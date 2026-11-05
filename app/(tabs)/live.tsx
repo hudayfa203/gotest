@@ -9,8 +9,8 @@ import { MAX_FEED_WIDTH } from '../../src/components/cards';
 import { Icon, type IconName } from '../../src/components/Icon';
 import { LiveCoverageRow, LiveLeadCard } from '../../src/components/live/LiveCards';
 import { LivePulse } from '../../src/components/LivePulse';
-import { OfflineBanner, useIsOffline } from '../../src/components/OfflineBanner';
-import { ScreenHeader } from '../../src/components/ScreenHeader';
+import { useIsOffline } from '../../src/components/OfflineBanner';
+import { TabHeader } from '../../src/components/TabHeader';
 import { SkeletonBox } from '../../src/components/Skeleton';
 import { EmptyState, ErrorState } from '../../src/components/StateViews';
 import { Txt } from '../../src/components/Txt';
@@ -88,8 +88,7 @@ export default function LiveHubScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>
-      <ScreenHeader title="Live updates" subtitle="Ongoing and recent live coverage" />
-      <OfflineBanner />
+      <TabHeader title="Live updates" nav="/live" />
       {hub.isPending ? (
         <LiveHubSkeleton />
       ) : hub.isError && !hub.data ? (

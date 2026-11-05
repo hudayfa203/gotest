@@ -3,7 +3,7 @@ import { useLocalSearchParams } from 'expo-router';
 import { View } from 'react-native';
 import { endpoints } from '../../src/api';
 import { ArticleList } from '../../src/components/ArticleList';
-import { ScreenHeader } from '../../src/components/ScreenHeader';
+import { TabHeader } from '../../src/components/TabHeader';
 import { useTheme } from '../../src/state/theme';
 
 function titleCase(slug: string) {
@@ -25,7 +25,7 @@ export default function SectionScreen() {
   const items = q.data?.pages.flatMap((p) => p.items) ?? [];
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>
-      <ScreenHeader title={cat?.name ?? titleCase(String(slug))} subtitle={cat?.description ?? 'Section'} />
+      <TabHeader title={cat?.name ?? titleCase(String(slug))} subtitle={cat?.description} back nav={`/section/${slug}`} />
       <ArticleList
         items={items}
         isPending={q.isPending}

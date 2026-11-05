@@ -5,7 +5,7 @@
 | Step | What it checks |
 |---|---|
 | Typecheck | strict TypeScript over the whole app, including generated typed routes |
-| Unit tests (Jest, 101 tests) | API client (headers, errors, withdrawn content, timeouts, non-API answers), offline sync, deep links, article block helpers, live-coverage merge logic and badges, version gate, server setting, built-in demo stories (only demo items, current timestamps, paging/filters/search, live feeds, no fake server features) |
+| Unit tests (Jest, 107 tests) | API client (headers, errors, withdrawn content, timeouts, non-API answers), offline sync, deep links, article block helpers, live-coverage merge logic and badges, version gate, server setting, built-in demo stories (only demo items, current timestamps, paging/filters/search, live feeds, no fake server features), Home ad slots and World Pulse placement, in-article ad position, menu link routing, map projection (checked against the website's d3-geo values) and marker clustering |
 | Release build | `expo prebuild` + Gradle `assembleRelease` with Hermes, new architecture, arm64-v8a + armeabi-v7a + x86_64 |
 | APK verification | package `news.goworld.app`, expected versionName/versionCode, APK Signature Scheme v2 valid, certificate fingerprint |
 | Emulator test (Android 14, Pixel 6 profile) | installs the APK, cold-starts it, opens Home, Latest, Live Updates, an article and Settings, takes screenshots, reads the visible text, checks the process is alive and that logcat has no crash; Back button |

@@ -49,6 +49,9 @@ by default), or keep the current APK and enter the address under *Settings → S
   `/navigation`, `/authors/{slug}`, `/tags/{slug}`, `/search`, `/live`, `/live/archive`, `/live/{id}`, `/alerts`, `/resolve`, `/sync`, `/devices`,
   `/push/*`, `/events`, `/auth/*`, `/me/*`, `/newsletter`, `/podcasts`, `/ads/*`.
 - Media URLs reachable from phones (`/media/…` on the website host, or the configured CDN).
+- `/pulse` for the World Pulse map, and the app's ad placements (created by platform migration 0015:
+  `app_home_top`, `app_feed_3`, `app_feed_6`, `app_list_inline`, `app_article_inline_1`, `app_article_end`,
+  `app_article_sticky`). Editors attach campaigns to them in Dashboard → Ads; a slot without a campaign shows nothing.
 - For links like `https://goworld.news/world/some-story-abc123defg` to open in the app (Android App Links), the
   website must serve `/.well-known/assetlinks.json` with the app's signing-certificate SHA-256. Each GitHub release
   lists that fingerprint; the platform serves the file once `ANDROID_CERT_SHA256` is set.

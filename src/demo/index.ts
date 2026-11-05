@@ -144,6 +144,7 @@ function routeGet(path: string, q: Record<string, string>): Out {
     case 'config': return ok(snap.config);
     case 'home': return ok({ ...snap.home, generatedAt: snapshotNow() });
     case 'alerts': return ok(snap.alerts);
+    case 'pulse': return ok((snap.summaries as Json[]).filter((x) => x.location).sort(byNewest).slice(0, 40));
     case 'categories': return ok(snap.categories);
     case 'navigation': return ok(snap.navigation[q.menu] ?? []);
     case 'podcasts': return ok(snap.podcasts);

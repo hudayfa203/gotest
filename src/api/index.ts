@@ -6,7 +6,7 @@ import * as Localization from 'expo-localization';
 import { APP_VERSION, getApiUrl, IS_WEB_PREVIEW, isDemoMode, PLATFORM } from '../config';
 import { secure, SECURE_KEYS } from '../storage/secure';
 import type {
-  AdResponse, AnalyticsEvent, AppConfig, Article, ArticlePage, Author, BreakingAlert, Bookmark, Category, Homepage,
+  AdResponse, AnalyticsEvent, AppConfig, Article, ArticlePage, ArticleSummary, Author, BreakingAlert, Bookmark, Category, Homepage,
   LiveArchivePage, LiveFeed, LiveHub, NavItem, NumberedPage, PodcastEpisode, PushPreferences, ResolveResult, SyncChanges, TagRef,
 } from '../types';
 import { createApiClient, isNetworkError } from './client';
@@ -110,6 +110,8 @@ export const endpoints = {
   liveFeed: (id: string, since?: string | null, signal?: AbortSignal) => api.request<LiveFeed>(`/live/${encodeURIComponent(id)}`, { query: { since }, signal }),
   resolve: (path: string, signal?: AbortSignal) => api.request<ResolveResult>('/resolve', { query: { path }, signal }),
   alerts: (signal?: AbortSignal) => api.request<BreakingAlert[]>('/alerts', { signal }),
+  // World Pulse: recent stories that carry a location (map on Home)
+  pulse: (signal?: AbortSignal) => api.request<ArticleSummary[]>('/pulse', { signal }),
   categories: (signal?: AbortSignal) => api.request<Category[]>('/categories', { signal }),
   navigation: (menu: 'app_explore' | 'app_tabs' | 'web_main' | 'web_footer', signal?: AbortSignal) => api.request<NavItem[]>('/navigation', { query: { menu }, signal }),
   author: (slug: string, cursor?: string | null, signal?: AbortSignal) =>

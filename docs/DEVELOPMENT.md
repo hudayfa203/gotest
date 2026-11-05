@@ -75,6 +75,12 @@ they fail in a browser preview. Native apps do not use CORS — this is a web-pr
 
 ## 2. What is in the app
 
+> **v1.2 redesign:** website chrome (`src/components/AppHeader.tsx` masthead + section bar, `RedBar.tsx`, side menu
+> `app/menu.tsx`), tab bar Home · Latest · Live · Video · Saved (Explore became Search: `app/explore.tsx`, opened from the
+> header and the menu), World Pulse (`src/features/pulse`), article extras (`src/components/article/ArticleExtras.tsx`:
+> breadcrumb, share row, more from section, most read, in-article ad) and the app ad slots (`src/components/AdCard.tsx`).
+> The table below describes the screens' content; layout details follow the redesign.
+
 | Area | Implementation |
 |---|---|
 | Tabs | Home (GET /home rendered per layout: lead, top stories, latest, region/editors' picks/investigations carousels, video strip, opinion, podcasts, "Recent stories"/trending, newsletter promo, `app_feed_3` native ad, breaking banner with live pulse + the separate LIVE UPDATES entry — see *Live coverage*), Latest (keyset pagination), Explore (GET /navigation?menu=app_explore + search with type/section/sort filters, recent searches), Video (type=video + inline/fullscreen native player + podcast episodes), Saved (SQLite, swipe to delete, works in airplane mode) |

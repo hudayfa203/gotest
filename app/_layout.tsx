@@ -66,7 +66,8 @@ function ThemedApp() {
         <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.bg }, animation: 'slide_from_right' }}>
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="article/[id]" options={{ animation: 'slide_from_right' }} />
-          <Stack.Screen name="live/index" />
+          <Stack.Screen name="explore" />
+          <Stack.Screen name="menu" options={{ presentation: 'transparentModal', animation: 'none', contentStyle: { backgroundColor: 'transparent' } }} />
           <Stack.Screen name="section/[slug]" />
           <Stack.Screen name="author/[slug]" />
           <Stack.Screen name="topic/[slug]" />

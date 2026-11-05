@@ -1,8 +1,11 @@
+import { useQuery } from '@tanstack/react-query';
 import { Tabs, type BottomTabBarProps } from 'expo-router/js-tabs';
 import { View } from 'react-native';
 import Animated, { useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { endpoints } from '../../src/api';
 import { Icon, type IconName } from '../../src/components/Icon';
+import { LivePulse } from '../../src/components/LivePulse';
 import { Tap } from '../../src/components/Tap';
 import { Txt } from '../../src/components/Txt';
 import { haptic } from '../../src/lib/haptics';
@@ -11,12 +14,12 @@ import { useTheme } from '../../src/state/theme';
 const TABS: { name: string; title: string; icon: IconName }[] = [
   { name: 'index', title: 'Home', icon: 'home' },
   { name: 'latest', title: 'Latest', icon: 'latest' },
-  { name: 'explore', title: 'Explore', icon: 'explore' },
+  { name: 'live', title: 'Live', icon: 'broadcast' },
   { name: 'video', title: 'Video', icon: 'video' },
   { name: 'saved', title: 'Saved', icon: 'saved' },
 ];
 
-function TabItem({ focused, title, icon, onPress, onLongPress }: { focused: boolean; title: string; icon: IconName; onPress: () => void; onLongPress: () => void }) {
+function TabItem({ focused, title, icon, onPress, onLongPress, liveDot }: { focused: boolean; title: string; icon: IconName; onPress: () => void; onLongPress: () => void; liveDot?: boolean }) {
   const { c, isDark } = useTheme();
   const active = isDark ? '#FFFFFF' : '#0B2A5E';
   const bar = useAnimatedStyle(() => ({ transform: [{ scaleX: withSpring(focused ? 1 : 0, { damping: 16, stiffness: 220 }) }, { skewX: '-15deg' }] }));
@@ -33,7 +36,12 @@ function TabItem({ focused, title, icon, onPress, onLongPress }: { focused: bool
     >
       <Animated.View style={[{ position: 'absolute', top: 0, width: 26, height: 3, borderRadius: 2, backgroundColor: '#E1141E' }, bar]} />
       <Animated.View style={ic}>
-        <Icon name={icon} size={23} color={focused ? active : c.textMuted} strokeWidth={focused ? 2.3 : 1.8} filled={focused && (icon === 'saved' || icon === 'home')} />
+        <Icon name={icon} size={23} color={icon === 'broadcast' && liveDot ? c.live : focused ? active : c.textMuted} strokeWidth={focused ? 2.3 : 1.8} filled={focused && (icon === 'saved' || icon === 'home')} />
+        {liveDot ? (
+          <View style={{ position: 'absolute', top: -2, right: -6 }}>
+            <LivePulse color={c.live} size={7} />
+          </View>
+        ) : null}
       </Animated.View>
       <Txt variant={focused ? 'uiBold' : 'ui'} size={11} color={focused ? active : c.textMuted} style={{ marginTop: 3 }} maxFontSizeMultiplier={1.3}>
         {title}
@@ -45,6 +53,9 @@ function TabItem({ focused, title, icon, onPress, onLongPress }: { focused: bool
 function TabBar({ state, emitter, navigateToTab }: BottomTabBarProps) {
   const { c } = useTheme();
   const insets = useSafeAreaInsets();
+  // a red pulse on the Live tab while coverage is live (from the cached home feed; no extra request)
+  const home = useQuery({ queryKey: ['home'], queryFn: ({ signal }) => endpoints.home(signal), staleTime: 60_000, enabled: false });
+  const liveNow = (home.data?.liveNow ?? []).some((l) => l.state === 'live');
   return (
     <View accessibilityRole="tablist" style={{ flexDirection: 'row', backgroundColor: c.bg, borderTopWidth: 1, borderTopColor: c.border, paddingBottom: Math.max(insets.bottom, 6) }}>
       {state.routes.map((route, index) => {
@@ -57,6 +68,7 @@ function TabBar({ state, emitter, navigateToTab }: BottomTabBarProps) {
             focused={focused}
             title={meta.title}
             icon={meta.icon}
+            liveDot={meta.name === 'live' && liveNow}
             onPress={() => {
               const e = emitter.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
               if (!focused && !e.defaultPrevented) {

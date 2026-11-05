@@ -51,25 +51,28 @@ No new APK is needed. Details: **[docs/BACKEND.md](docs/BACKEND.md)**.
 
 ## What is in the app
 
+Version 1.2 follows the goworld.news website: the same masthead, section bar, red **BREAKING / LIVE UPDATES** bar and
+heavy italic section titles, with app-only extras.
+
 | Area | What it does |
 |---|---|
-| Home | Lead story, top stories, latest, regional/editors' picks/investigations carousels, video, opinion, podcasts, trending, newsletter promo; red **BREAKING** banner and the separate **LIVE UPDATES** strip |
-| Latest · Explore · Video · Saved | Infinite lists, sections and search with filters, native video and podcast player, saved stories readable offline (SQLite) |
-| Articles | Native renderer for every content block (text, quotes, lists, images with zoom, video, embeds, tables, related coverage), corrections, sources, topics, share, save, text size |
-| Live Updates | Live hub, live-coverage timeline refreshing every 20 s, pinned key updates, "N new updates" pill, ENDED state, archive |
-| Settings | Push notification preferences, light/dark/system theme, text size, anonymous-statistics opt-out, optional passwordless account with bookmark sync, account deletion |
-| Offline | Last feeds and opened articles cached on the phone; offline banner |
-| Deep links | `goworldnews://…` and `https://goworld.news/…` article/live links open in the app |
+| Header and menu | Menu button, logo, search and light/dark switch; a section bar (Top stories, Latest, Live, World, Africa, Middle East…) like the website's; a side menu with search, shortcuts, every section with its sub-sections, appearance, notifications, newsletters and the publisher's pages |
+| Home | Red bar (rotating breaking alerts + LIVE UPDATES), lead story, top stories, the Latest timeline, **World Pulse** (a dotted world map with a marker for each story's location; tap to preview), regions, investigations, video, opinion, newsletter, most read, podcasts |
+| Tabs | Home · Latest · Live (red pulse while coverage is live) · Video · Saved |
+| Articles | Breadcrumb, full story with every content block, corrections, sources, topics, save for offline, share to WhatsApp / Telegram / X / Facebook / email, related coverage, more from the section, most read |
+| Live Updates | Live hub, coverage timelines refreshing every 20 s, key updates, "N new updates", ended coverage and archive |
+| Ads | Seven app slots managed in the dashboard (Ads): under the lead, two in the Home feed, between stories in lists, inside the article, below the article, and a closable strip at the bottom of articles. Every ad is labelled "Advertisement"; empty slots show nothing |
+| Everything from the dashboard | Stories, Home order, the section bar/menu (Navigation → app menu), alerts, live coverage, ads, push notifications, About/Privacy/Terms, app links and minimum version |
 
 <p>
-  <img src="docs/screenshots/home-live-updates.jpg" width="200" alt="Home with breaking banner and LIVE UPDATES">
-  <img src="docs/screenshots/live-hub.jpg" width="200" alt="Live hub">
-  <img src="docs/screenshots/live-coverage.jpg" width="200" alt="Live coverage timeline">
-  <img src="docs/screenshots/article.jpg" width="200" alt="Article">
+  <img src="docs/screenshots/v12-home.jpg" width="200" alt="Home: masthead, section bar, red breaking and live updates bar">
+  <img src="docs/screenshots/v12-menu.jpg" width="200" alt="Side menu">
+  <img src="docs/screenshots/v12-world-pulse.jpg" width="200" alt="Latest timeline and World Pulse map">
+  <img src="docs/screenshots/v12-article-ad.jpg" width="200" alt="Article with in-article advertisement and bottom strip">
 </p>
 
-<sub>Screens rendered from this source with the backend's clearly labelled <b>DEMO</b> content (web preview at phone
-size). Real phone screenshots from each build's emulator test are attached to every release.</sub>
+<sub>Screens rendered from this source with the built-in <b>DEMO</b> stories. Real phone screenshots from each build's
+emulator test are attached to every release.</sub>
 
 ## Repository layout
 
@@ -81,6 +84,7 @@ src/features/ src/lib/   app logic (sync, deep links, live merge logic, analytic
 src/push/ src/storage/   notifications; SecureStore / SQLite / AsyncStorage
 src/state/               settings, theme, content source (test builds)
 src/demo/                built-in demo stories for test builds (snapshot + bundled media)
+src/features/pulse/      World Pulse map (same projection as the website)
 assets/                  approved GO World News logo, app icons, splash, fonts
 plugins/                 Expo config plugin: Android release signing
 app.config.ts            app identity, version, permissions, deep links, API address
@@ -98,7 +102,7 @@ Requirements: Node 22, JDK 17, Android SDK (Android Studio). Then:
 
 ```bash
 npm ci
-npm run typecheck && npm test                      # TypeScript + 101 unit tests
+npm run typecheck && npm test                      # TypeScript + 107 unit tests
 EXPO_PUBLIC_API_URL=https://your-server/api/v1 \
 EXPO_PUBLIC_ALLOW_SERVER_OVERRIDE=1 EXPO_PUBLIC_DEMO_CONTENT=default npm run build:apk
 # → android/app/build/outputs/apk/release/app-release.apk

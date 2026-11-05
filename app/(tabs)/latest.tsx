@@ -18,7 +18,7 @@ export default function LatestScreen() {
   const items = q.data?.pages.flatMap((p) => p.items) ?? [];
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>
-      <TabHeader title="Latest" subtitle="Every story, newest first" />
+      <TabHeader title="Latest" nav="/latest" />
       <ArticleList
         items={items}
         isPending={q.isPending}

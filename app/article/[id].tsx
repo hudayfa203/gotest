@@ -16,6 +16,8 @@ import {
 } from '../../src/components/article/ArticleParts';
 import { Blocks } from '../../src/components/article/Blocks';
 import { RelatedStories } from '../../src/components/article/RelatedStories';
+import { Breadcrumb, MoreFromSection, MostRead, ShareRow, withInlineAd } from '../../src/components/article/ArticleExtras';
+import { AdCard, ANCHOR_AD_SPACE, AnchorAd } from '../../src/components/AdCard';
 import { Icon } from '../../src/components/Icon';
 import { LiveStatusBanner, LiveTimeline } from '../../src/components/live/LiveTimeline';
 import { InlineVideo } from '../../src/components/media/InlineVideo';
@@ -350,7 +352,7 @@ function ArticleScreen() {
         onScrollEndDrag={notify}
         onContentSizeChange={(_w, h) => (contentH.value = h)}
         onLayout={(e) => (viewH.value = e.nativeEvent.layout.height)}
-        contentContainerStyle={{ paddingBottom: insets.bottom + 48, paddingTop: heroH ? 0 : topPad }}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 48 + ANCHOR_AD_SPACE, paddingTop: heroH ? 0 : topPad }}
         accessibilityLabel={article.headline}
       >
         {heroH && article.image ? (
@@ -381,12 +383,13 @@ function ArticleScreen() {
             </View>
           ) : null}
           {article.isDemo ? <DemoNotice /> : null}
+          <Breadcrumb a={article} />
           <ArticleHeaderText a={article} scale={scale} liveState={isLiveArticle ? (status === 'live' ? 'live' : status === 'ended' || status === 'archived' ? 'ended' : null) : undefined} />
           {isLiveArticle && status ? <LiveStatusBanner status={status} coverage={bannerCoverage} fetchedAt={feed?.fetchedAt ?? (articleAt || null)} now={now} offline={offline} /> : null}
           <SponsorBox a={article} />
           <Byline a={article} live={isLiveArticle} />
           {article.type === 'podcast' ? <PodcastEpisodeSection articleId={article.id} /> : null}
-          <Blocks blocks={article.body} ctx={{ width: readW, scale, articleId: article.id, skipVideoUrl: heroVideo?.kind === 'file' ? heroVideo.url : undefined }} />
+          <Blocks blocks={withInlineAd(article.body)} ctx={{ width: readW, scale, articleId: article.id, skipVideoUrl: heroVideo?.kind === 'file' ? heroVideo.url : undefined }} />
           {isLiveArticle ? (
             <View onLayout={(e) => setFeedLocalY(e.nativeEvent.layout.y)}>
               <LiveTimeline
@@ -405,19 +408,18 @@ function ArticleScreen() {
           <CorrectionsBox corrections={article.corrections} />
           <Sources sources={article.sources} />
           <Tags tags={article.tags} />
-          <View style={{ flexDirection: 'row', gap: 10, marginTop: 4 }}>
-            <Tap haptics onPress={() => void toggleSave()} accessibilityLabel={isSaved ? 'Remove from saved' : 'Save for offline reading'} style={{ flex: 1, minHeight: 48, borderRadius: 999, borderWidth: 1, borderColor: c.border, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: isSaved ? c.surface : 'transparent' }}>
-              <Icon name={isSaved ? 'saved-filled' : 'saved'} size={18} color={c.heading} />
-              <Txt variant="uiBold" size={14}>{isSaved ? 'Saved offline' : 'Save'}</Txt>
-            </Tap>
-            <Tap haptics onPress={() => void share()} accessibilityLabel="Share" style={{ flex: 1, minHeight: 48, borderRadius: 999, backgroundColor: isDark ? '#FFFFFF' : '#0B2A5E', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-              <Icon name="share" size={18} color={isDark ? '#061A40' : '#FFFFFF'} />
-              <Txt variant="uiBold" size={14} color={isDark ? '#061A40' : '#FFFFFF'}>Share</Txt>
-            </Tap>
-          </View>
+          <Tap haptics onPress={() => void toggleSave()} accessibilityLabel={isSaved ? 'Remove from saved' : 'Save for offline reading'} style={{ minHeight: 48, borderRadius: 999, borderWidth: 1, borderColor: c.border, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: isSaved ? c.surface : 'transparent', marginTop: 4 }}>
+            <Icon name={isSaved ? 'saved-filled' : 'saved'} size={18} color={c.heading} />
+            <Txt variant="uiBold" size={14}>{isSaved ? 'Saved for offline reading' : 'Save for offline reading'}</Txt>
+          </Tap>
+          <ShareRow a={article} onMore={() => void share()} />
+          <AdCard placement="app_article_end" width={readW} />
           <RelatedStories items={related} />
+          <MoreFromSection a={article} exclude={new Set(related.map((r) => r.id))} />
+          <MostRead excludeId={article.id} />
         </Animated.View>
       </Animated.ScrollView>
+      <AnchorAd />
     </View>
   );
 }

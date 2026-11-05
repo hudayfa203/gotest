@@ -3,20 +3,20 @@ import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, Keyboard, Platform, ScrollView, TextInput, View, type TextInputInstance } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
-import { endpoints } from '../../src/api';
-import { MAX_FEED_WIDTH, StoryRow } from '../../src/components/cards';
-import { Icon } from '../../src/components/Icon';
-import { FeedSkeleton } from '../../src/components/Skeleton';
-import { EmptyState, ErrorState } from '../../src/components/StateViews';
-import { TabHeader } from '../../src/components/TabHeader';
-import { Tap } from '../../src/components/Tap';
-import { Txt } from '../../src/components/Txt';
-import { track } from '../../src/lib/analytics';
-import { targetFromWebPath } from '../../src/lib/deeplink';
-import { openTarget } from '../../src/lib/navigation';
-import { kv, KV_KEYS } from '../../src/storage/kv';
-import { useTheme } from '../../src/state/theme';
-import { fonts } from '../../src/theme';
+import { endpoints } from '../src/api';
+import { MAX_FEED_WIDTH, StoryRow } from '../src/components/cards';
+import { Icon } from '../src/components/Icon';
+import { FeedSkeleton } from '../src/components/Skeleton';
+import { EmptyState, ErrorState } from '../src/components/StateViews';
+import { TabHeader } from '../src/components/TabHeader';
+import { Tap } from '../src/components/Tap';
+import { Txt } from '../src/components/Txt';
+import { track } from '../src/lib/analytics';
+import { targetFromWebPath } from '../src/lib/deeplink';
+import { openTarget } from '../src/lib/navigation';
+import { kv, KV_KEYS } from '../src/storage/kv';
+import { useTheme } from '../src/state/theme';
+import { fonts } from '../src/theme';
 
 /** the container shows focus instead of the browser's outline (web preview only) */
 const noWebOutline = Platform.OS === 'web' ? ({ outlineWidth: 0 } as object) : null;
@@ -173,7 +173,7 @@ export default function ExploreScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>
-      <TabHeader title="Explore" subtitle="Sections, topics and search">
+      <TabHeader title="Search" subtitle="Stories, sections and topics" back>
         {searchBox}
       </TabHeader>
       {active ? (

@@ -1,7 +1,7 @@
 import { router, type Href } from 'expo-router';
 import { ScrollView, View } from 'react-native';
 import { AdCard } from '../../components/AdCard';
-import { LatestRow, LeadCard, OpinionCard, PodcastCard, StoryCard, StoryRow, TrendingRow, VideoCard, useFeedWidth } from '../../components/cards';
+import { LeadCard, TimelineRow, OpinionCard, PodcastCard, StoryCard, StoryRow, TrendingRow, VideoCard, useFeedWidth } from '../../components/cards';
 import { NewsletterPromo } from '../../components/NewsletterPromo';
 import { SectionHeader } from '../../components/SectionHeader';
 import { openWebUrl } from '../../lib/navigation';
@@ -47,12 +47,13 @@ export function HomeSection({ s }: { s: HomepageSection }) {
     }
     case 'latest':
       if (!s.items.length) return null;
+      // the website's timeline: clock time, red dot on a rail, category, headline — on a tinted band
       return (
-        <View>
-          <SectionHeader title={s.title || 'Latest'} onMore={() => router.navigate('/latest' as Href)} moreLabel="All latest" />
+        <View style={{ backgroundColor: c.surface, paddingTop: 22, paddingBottom: 10, width: full, alignSelf: 'center' }}>
+          <SectionHeader title={s.title || 'Latest'} onMore={() => router.navigate('/latest' as Href)} moreLabel="All latest news" />
           <View style={pad}>
-            {s.items.slice(0, 6).map((a, i, arr) => (
-              <LatestRow key={a.id} a={a} last={i === arr.length - 1} />
+            {s.items.slice(0, 7).map((a, i, arr) => (
+              <TimelineRow key={a.id} a={a} last={i === arr.length - 1} />
             ))}
           </View>
         </View>
@@ -125,7 +126,7 @@ export function HomeSection({ s }: { s: HomepageSection }) {
       if (!s.items.length) return null;
       return (
         <View>
-          <SectionHeader title={s.title || 'Trending'} />
+          <SectionHeader title={s.title || 'Most read'} />
           <View style={[pad, { backgroundColor: c.bg }]}>
             {s.items.map((a, i) => (
               <TrendingRow key={a.id} a={a} rank={i + 1} last={i === s.items.length - 1} />
