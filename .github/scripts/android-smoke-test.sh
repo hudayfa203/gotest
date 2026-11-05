@@ -36,8 +36,28 @@ screen_text() {
   fi
 }
 
+# CI emulators are slow: the system launcher sometimes shows "isn't responding" over our app. Close such
+# system dialogs (they are not ours) before each screenshot; the report still says when one appeared.
+dismiss_system_dialogs() {
+  adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS >/dev/null 2>&1 || true
+  if timeout 30 adb shell uiautomator dump /sdcard/gw-anr.xml >/dev/null 2>&1 && adb pull /sdcard/gw-anr.xml "$OUT/.anr.xml" >/dev/null 2>&1 \
+    && grep -q "isn't responding\|isn&apos;t responding" "$OUT/.anr.xml"; then
+    local b
+    b="$(grep -o 'text="Wait"[^>]*bounds="\[[0-9]*,[0-9]*\]\[[0-9]*,[0-9]*\]"' "$OUT/.anr.xml" | grep -o '\[[0-9]*,[0-9]*\]\[[0-9]*,[0-9]*\]' | head -n 1)"
+    if [ -n "$b" ]; then
+      local x1 y1 x2 y2
+      read -r x1 y1 x2 y2 <<<"$(echo "$b" | sed 's/\]\[/,/; s/[][]//g' | tr ',' ' ')"
+      adb shell input tap $(((x1 + x2) / 2)) $(((y1 + y2) / 2)) >/dev/null 2>&1 || true
+      SYSTEM_DIALOGS=$((SYSTEM_DIALOGS + 1))
+      sleep 2
+    fi
+  fi
+}
+SYSTEM_DIALOGS=0
+
 capture() { # name, title
   local name="$1" title="$2"
+  dismiss_system_dialogs
   adb exec-out screencap -p > "$OUT/$name.png" 2>/dev/null || true
   local txt
   txt="$(screen_text "$name")"
@@ -56,6 +76,8 @@ open_link() { # url, name, title, wait
 
 adb wait-for-device
 for s in window_animation_scale transition_animation_scale animator_duration_scale; do adb shell settings put global "$s" 0 >/dev/null 2>&1 || true; done
+# do not show "app isn't responding" dialogs for other apps (the system launcher) during the test
+adb shell settings put global hide_error_dialogs 1 >/dev/null 2>&1 || true
 
 say "### Emulator smoke test"
 say "- Device: Android $(adbs getprop ro.build.version.release) (API $(adbs getprop ro.build.version.sdk)), $(adbs getprop ro.product.cpu.abi), screen $(adbs wm size | awk '{print $NF}' | tail -1)"
@@ -104,6 +126,7 @@ fi
 NET="$(grep -cE 'Network request failed|could not be reached|took too long' "$OUT/logcat-full.txt" || true)"
 [ "${NET:-0}" != "0" ] && say "- ℹ️ $NET network-failure log lines: the configured API server did not answer from the emulator (see the backend notes)."
 
+[ "$SYSTEM_DIALOGS" -gt 0 ] && say "- ℹ️ Closed $SYSTEM_DIALOGS Android system dialog(s) (\"isn't responding\" from the emulator's launcher, not from this app) before screenshots."
 say "- Result: **$STATUS**"
 echo "$STATUS" > "$OUT/status"
 exit 0

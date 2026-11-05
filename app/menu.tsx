@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import { router, type Href } from 'expo-router';
 import { useEffect, type ReactNode } from 'react';
-import { BackHandler, Linking, Pressable, ScrollView, View, useWindowDimensions } from 'react-native';
+import { BackHandler, Linking, Pressable, ScrollView, Share, View, useWindowDimensions } from 'react-native';
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { scheduleOnRN } from 'react-native-worklets';
@@ -192,6 +192,16 @@ export default function MenuScreen() {
           <MenuRow icon="bell" label="Notifications" onPress={() => go('/settings')} />
           <MenuRow icon="mail" label="Newsletters" onPress={() => close(() => void openExternal(`${getSiteUrl()}/newsletters`))} />
           <MenuRow icon="settings" label="Settings" onPress={() => go('/settings')} />
+          {config.data?.storeUrls?.android || config.data?.storeUrls?.ios ? (
+            <MenuRow
+              icon="share"
+              label="Share the app"
+              onPress={() => {
+                const links = [config.data?.storeUrls?.android ? `Android: ${config.data.storeUrls.android}` : null, config.data?.storeUrls?.ios ? `iPhone: ${config.data.storeUrls.ios}` : null].filter(Boolean).join('\n');
+                void Share.share({ message: `GO World News — ${config.data?.tagline ?? 'Breaking News. Beyond Borders.'}\n${links}` }).catch(() => {});
+              }}
+            />
+          ) : null}
 
           <Heading title="GO World News" />
           <MenuRow label="About us" onPress={() => go('/settings/page/about')} />
