@@ -74,6 +74,7 @@ function ThemedApp() {
           <Stack.Screen name="settings/index" />
           <Stack.Screen name="settings/page/[key]" />
           <Stack.Screen name="settings/sign-in" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
+          <Stack.Screen name="settings/newsletter" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
           <Stack.Screen name="auth" options={{ presentation: 'modal', animation: 'fade' }} />
           <Stack.Screen name="link" options={{ presentation: 'transparentModal', animation: 'fade' }} />
         </Stack>

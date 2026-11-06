@@ -25,7 +25,7 @@ const NAVY = '#0B2A5E';
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
-  name: 'Garowe World',
+  name: 'GO World News', // launcher and store name (owner, 6 Nov 2026); the publication inside the app is Garowe World
   slug: 'goworld-news',
   version: VERSION_NAME,
   orientation: 'portrait',
@@ -34,7 +34,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   icon: './assets/images/icon.png',
   backgroundColor: DEEP_NAVY,
   primaryColor: NAVY,
-  description: 'Breaking News. Beyond Borders. International news from Garowe World.',
+  description: 'Breaking News. Beyond Borders. International news from GO World News, a Garowe World publication.',
   ios: {
     bundleIdentifier: 'news.goworld.app',
     buildNumber: String(VERSION_CODE),

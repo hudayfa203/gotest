@@ -8,8 +8,8 @@
 #
 # Optional repository settings (Settings → Secrets and variables → Actions). Nothing here is required for a test APK:
 #   variables  GW_API_URL                       API the app talks to (default https://goworld.news/api/v1)
-#              GW_DEMO_CONTENT                  built-in demo stories in test APKs: default (shown first, the default),
-#                                               available (selectable in Settings) or off
+#              GW_DEMO_CONTENT                  built-in demo stories in test APKs: off (the default — live goworld.news),
+#                                               available (selectable in Settings) or default (shown first)
 #              EAS_PROJECT_ID                   Expo project id, enables push notification tokens
 #   secrets    ANDROID_UPLOAD_KEYSTORE_BASE64   upload key (.jks, base64) — Google Play signing; see docs/RELEASING.md
 #              ANDROID_UPLOAD_STORE_PASSWORD, ANDROID_UPLOAD_KEY_ALIAS, ANDROID_UPLOAD_KEY_PASSWORD
@@ -41,7 +41,7 @@ env:
   NODE_VERSION: '22'
   JAVA_VERSION: '17'
   GW_API_URL: ${{ inputs.api_url || vars.GW_API_URL || 'https://goworld.news/api/v1' }}
-  GW_DEMO_CONTENT: ${{ vars.GW_DEMO_CONTENT || 'default' }}
+  GW_DEMO_CONTENT: ${{ vars.GW_DEMO_CONTENT || 'off' }}   # goworld.news carries real journalism: builds read it directly
 
 jobs:
   checks:
@@ -266,7 +266,7 @@ jobs:
           profile: pixel_6
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none
-          script: bash .github/scripts/android-smoke-test.sh dist/Garowe-World.apk smoke
+          script: GW_DEMO_CONTENT=${{ env.GW_DEMO_CONTENT }} GW_API_URL=${{ env.GW_API_URL }} bash .github/scripts/android-smoke-test.sh dist/Garowe-World.apk smoke
       - name: Verdict
         if: always()
         run: |

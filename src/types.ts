@@ -213,7 +213,11 @@ export interface AppConfig {
   social: Record<string, string>;
   contactEmail: string;
   tipsEmail: string;
+  /** The publisher's name (Garowe Online Media Group) for the About screen and store notices. */
+  publisher?: string;
   pages: { about: string; editorialStandards: string; privacy: string; terms: string };
+  /** Website addresses of the same pages, for "Read on goworld.news". */
+  pageUrls?: { about: string; editorialStandards: string; privacy: string; terms: string };
 }
 
 export interface Ad {

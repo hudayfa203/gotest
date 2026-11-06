@@ -5,8 +5,8 @@
 #
 # Installs the APK on the running emulator, cold-starts it, opens the main screens through the app's own deep links
 # (goworldnews://latest, ://live, an article, ://settings), and records for each screen: a screenshot, the visible text (from
-# uiautomator) and whether the app process is still alive. Test APKs open with the built-in demo stories, so content
-# screens should show stories; with a server configured they show what that server returns. Fails on install errors, crashes and dead processes.
+# uiautomator) and whether the app process is still alive. Builds read the live API server (goworld.news) unless
+# GW_DEMO_CONTENT=default, in which case they open with the built-in demo stories. Fails on install errors, crashes and dead processes.
 # Network-dependent content is reported, not judged: the emulator may not be able to reach the configured API server.
 set -uo pipefail
 
@@ -100,11 +100,20 @@ sleep 25
 capture "01-home" "Home (cold start)"
 open_link "goworldnews://latest" "02-latest" "Latest" 10
 open_link "goworldnews://live" "03-live" "Live Updates" 10
-ARTICLE_ID="$(node -p "(require('./src/demo/snapshot.json').summaries.find((s) => s.type === 'news') || {}).id || ''" 2>/dev/null || true)"
+if [ "${GW_DEMO_CONTENT:-off}" = "default" ]; then
+  # demo build: a built-in demo story, looked up in the bundled snapshot
+  ARTICLE_ID="$(node -p "(require('./src/demo/snapshot.json').summaries.find((s) => s.type === 'news') || {}).id || ''" 2>/dev/null || true)"
+  SNIPPET="$(node -p "((require('./src/demo/snapshot.json').summaries.find((s) => s.id === '$ARTICLE_ID') || {}).standfirst || '').split(/['\"&<>]/)[0].slice(0, 28)" 2>/dev/null || true)"
+else
+  # live build: the newest story on the API server this build talks to (skipped, not failed, if the runner can't reach it)
+  LATEST="$(curl -fsS --max-time 15 "${GW_API_URL:-https://goworld.news/api/v1}/articles?pageSize=1" 2>/dev/null || true)"
+  ARTICLE_ID="$(printf '%s' "$LATEST" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{const a=JSON.parse(s).items[0];console.log(a?a.id:'')}catch{console.log('')}})" 2>/dev/null || true)"
+  SNIPPET="$(printf '%s' "$LATEST" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{const a=JSON.parse(s).items[0];console.log((a.headline||'').split(/['\"&<>]/)[0].slice(0,28))}catch{console.log('')}})" 2>/dev/null || true)"
+  [ -z "$ARTICLE_ID" ] && say "- ℹ️ Story screen not checked: the runner could not read the newest story from ${GW_API_URL:-the API}."
+fi
 if [ -n "$ARTICLE_ID" ]; then
   open_link "goworldnews://article/$ARTICLE_ID" "04-article" "Article ($ARTICLE_ID)" 10
-  # the story text itself must be on screen (not just the header/toolbar): look for the start of its standfirst
-  SNIPPET="$(node -p "((require('./src/demo/snapshot.json').summaries.find((s) => s.id === '$ARTICLE_ID') || {}).standfirst || '').split(/['\"&<>]/)[0].slice(0, 28)" 2>/dev/null || true)"
+  # the story text itself must be on screen (not just the header/toolbar)
   if [ -n "$SNIPPET" ]; then
     if grep -qF "$SNIPPET" "$OUT/04-article.xml" 2>/dev/null; then say "- ✅ Article text is visible"; else fail "Article text is not visible on the story screen (looked for: \"$SNIPPET\")"; fi
   fi

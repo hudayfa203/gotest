@@ -113,7 +113,7 @@ export const endpoints = {
   // World Pulse: recent stories that carry a location (map on Home)
   pulse: (signal?: AbortSignal) => api.request<ArticleSummary[]>('/pulse', { signal }),
   categories: (signal?: AbortSignal) => api.request<Category[]>('/categories', { signal }),
-  navigation: (menu: 'app_explore' | 'app_tabs' | 'web_main' | 'web_footer', signal?: AbortSignal) => api.request<NavItem[]>('/navigation', { query: { menu }, signal }),
+  navigation: (menu: 'app_explore' | 'app_tabs' | 'web_main' | 'web_footer' | 'web_menu_top' | 'web_menu_news' | 'web_menu_features', signal?: AbortSignal) => api.request<NavItem[]>('/navigation', { query: { menu }, signal }),
   author: (slug: string, cursor?: string | null, signal?: AbortSignal) =>
     api.request<{ author: Author; articles: NumberedPage }>(`/authors/${encodeURIComponent(slug)}`, { query: { cursor }, signal }),
   tag: (slug: string, cursor?: string | null, signal?: AbortSignal) =>
@@ -135,6 +135,8 @@ export const endpoints = {
     api.request<void>('/push/opened', { method: 'POST', body: b, auth: 'device' }),
 
   // ---------------------------------------------------------------- reader accounts (Bearer session)
+  newsletterSubscribe: (email: string, lists: string[]) =>
+    api.request<{ ok: boolean; status: 'confirmation_sent' | 'already_subscribed'; emailDelivered: boolean }>('/newsletter/subscribe', { method: 'POST', body: { email, lists, consent: true, source: 'app' } }),
   authRequest: (email: string) => api.request<{ ok: boolean; emailDelivered: boolean; devNote?: string }>('/auth/request', { method: 'POST', body: { email, app: true } }),
   authVerify: (token: string) => api.request<{ sessionToken: string }>('/auth/verify', { method: 'POST', body: { token, app: true }, auth: 'device' }),
   logout: () => api.request<void>('/auth/logout', { method: 'POST', auth: 'reader' }),

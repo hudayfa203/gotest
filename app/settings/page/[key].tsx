@@ -2,7 +2,8 @@ import { useLocalSearchParams } from 'expo-router';
 import { ScrollView, View } from 'react-native';
 import { ScreenHeader } from '../../../src/components/ScreenHeader';
 import { FeedSkeleton } from '../../../src/components/Skeleton';
-import { ErrorState } from '../../../src/components/StateViews';
+import { Button, ErrorState } from '../../../src/components/StateViews';
+import { openExternal } from '../../../src/lib/navigation';
 import { Txt } from '../../../src/components/Txt';
 import { useAppConfig } from '../../../src/features/UpdateGate';
 import { useTheme } from '../../../src/state/theme';
@@ -39,6 +40,14 @@ export default function InfoPage() {
               {p.trim()}
             </Txt>
           ))}
+          {key === 'about' && config.data?.publisher ? (
+            <Txt variant="ui" size={14} muted>
+              Garowe World is published by {config.data.publisher}.{config.data.contactEmail ? ` Contact: ${config.data.contactEmail}` : ''}
+            </Txt>
+          ) : null}
+          {config.data?.pageUrls?.[key as keyof AppConfig['pages']] ? (
+            <Button title="Read on goworld.news" kind="secondary" icon="external" onPress={() => void openExternal(config.data!.pageUrls![key as keyof AppConfig['pages']])} />
+          ) : null}
         </ScrollView>
       )}
     </View>

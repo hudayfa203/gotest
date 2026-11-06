@@ -58,11 +58,21 @@ export async function getPushToken(): Promise<TokenResult> {
   if (!PUSH_SUPPORTED) return { ok: false, reason: 'unsupported', message: 'Push notifications are only available in the iPhone and Android apps.' };
   if (!Device.isDevice) return { ok: false, reason: 'simulator', message: 'Push notifications need a physical device (simulators and emulators cannot receive them).' };
   if (!EAS_PROJECT_ID) {
+    // Android without an Expo project: register the device's own Firebase (FCM) token; the server sends to it directly
+    // once the publisher's Firebase key is installed. Builds without google-services.json cannot get one.
+    if (Platform.OS === 'android') {
+      try {
+        const t = await Notifications.getDevicePushTokenAsync();
+        if (typeof t.data === 'string' && t.data.length >= 20) return { ok: true, token: t.data };
+      } catch {
+        /* fall through to the explanation below */
+      }
+    }
     return {
       ok: false,
       reason: 'no-project-id',
       message:
-        'This build is not linked to an Expo (EAS) project yet, so it cannot receive push notifications. The app owner must run "eas init" and rebuild. Your notification choices are still saved.',
+        'This build is not connected to a push service yet, so it cannot receive notifications. Your notification choices are saved and will apply once it is.',
     };
   }
   try {

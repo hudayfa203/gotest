@@ -328,7 +328,7 @@ function AccountGroup() {
 
   if (signedIn === null) return null;
   return (
-    <Group title="Account" footer={signedIn ? undefined : 'An account is optional: everything in the app works without one. Signing in only syncs your saved stories between devices.'}>
+    <Group title="Account" footer={signedIn ? undefined : 'An account is optional: everything in the app works without one. With an account your saved stories sync between your devices and goworld.news.'}>
       {signedIn ? (
         <>
           <Row icon="user" title="Signed in" subtitle="Your saved stories sync with your reader account" />
@@ -350,7 +350,7 @@ function AccountGroup() {
           <Row icon="trash" title="Delete account" subtitle="Permanently delete your reader account" danger onPress={() => void deleteAccount()} last />
         </>
       ) : (
-        <Row icon="user" title="Sign in with email" subtitle="Passwordless: we email you a one-time link" onPress={() => router.push('/settings/sign-in' as Href)} last />
+        <Row icon="user" title="Create an account or sign in" subtitle="With your email — no password: we send a one-time link" onPress={() => router.push('/settings/sign-in' as Href)} last />
       )}
     </Group>
   );
@@ -524,6 +524,9 @@ export default function SettingsScreen() {
 
         {CONTENT_SOURCE_SETTINGS ? <ContentSourceGroup /> : null}
 
+        <Group title="Newsletters">
+          <Row icon="mail" title="Sign up for newsletters" subtitle="The World Briefing, weekly review, breaking news" onPress={() => router.push('/settings/newsletter' as Href)} last />
+        </Group>
         <Group title="About Garowe World">
           <Row icon="info" title="About us" onPress={page('about')} />
           <Row icon="check" title="Editorial standards & corrections" onPress={page('editorialStandards')} />
